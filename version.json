@@ -1,4 +1,3769 @@
-{
-  "version": "1.2.0",
-  "download_url": "https://github.com/Forzes12/Launcher/releases/latest"
-}
+import sys
+import os
+import subprocess
+import json
+import time
+import random
+import requests
+import webbrowser
+from typing import List, Dict, Optional
+from dataclasses import dataclass, asdict
+from io import BytesIO
+
+from PyQt6.QtWidgets import (
+    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+    QLabel, QPushButton, QMessageBox, QFileDialog,
+    QScrollArea, QFrame, QProgressBar, QStackedWidget, QGraphicsOpacityEffect,
+    QGridLayout, QComboBox, QLineEdit, QDialog, QSlider, QSizePolicy
+)
+from PyQt6.QtCore import (
+    Qt, QPropertyAnimation, QEasingCurve, QTimer, QThread, pyqtSignal, 
+    QParallelAnimationGroup, QSequentialAnimationGroup, QRect, QSize, QUrl,
+    QDir, QStandardPaths, pyqtSlot
+)
+from PyQt6.QtGui import (
+    QGuiApplication, QCursor, QPixmap, QFont, QPainter, QImage, QIcon,
+    QDesktopServices, QKeyEvent, QColor, QLinearGradient, QGradient,
+    QWheelEvent, QMouseEvent, QPainterPath, QBrush, QPen
+)
+from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
+from PyQt6.QtMultimediaWidgets import QVideoWidget
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtWebEngineCore import QWebEngineSettings
+
+# Получаем абсолютный путь к директории приложения
+if hasattr(sys, '_MEIPASS'):
+    APP_DIR = sys._MEIPASS
+else:
+    APP_DIR = os.path.dirname(os.path.abspath(__file__))
+
+class UpdateManager:
+    """Менеджер обновлений для лаунчера"""
+    
+    def __init__(self, settings_manager):
+        self.settings_manager = settings_manager
+        self.update_url = "https://github.com/Forzes12/Launcheri/blob/main/version.json"
+        self.current_version = "1.1.0"
+        self.latest_version = None
+        self.update_available = False
+        self.update_button = None
+        
+    def check_for_updates(self):
+        """Проверяет наличие обновлений"""
+        try:
+            # Для демонстрации имитируем наличие обновления
+            # В реальном приложении замените на реальный запрос к GitHub
+            self.latest_version = "1.1.0"
+            self.update_available = True
+            
+            # Раскомментируйте для реального использования с GitHub:
+            """
+            response = requests.get(self.update_url, timeout=10)
+            if response.status_code == 200:
+                update_info = response.json()
+                self.latest_version = update_info.get('version', self.current_version)
+                if self.compare_versions(self.latest_version, self.current_version) > 0:
+                    self.update_available = True
+                    return True
+            return False
+            """
+            
+            return True
+                    
+        except Exception as e:
+            print(f"Ошибка при проверке обновлений: {e}")
+            return False
+    
+    def compare_versions(self, version1, version2):
+        """Сравнивает две версии вида X.Y.Z"""
+        v1_parts = list(map(int, version1.split('.')))
+        v2_parts = list(map(int, version2.split('.')))
+        
+        for i in range(max(len(v1_parts), len(v2_parts))):
+            v1 = v1_parts[i] if i < len(v1_parts) else 0
+            v2 = v2_parts[i] if i < len(v2_parts) else 0
+            if v1 != v2:
+                return v1 - v2
+        return 0
+    
+    def get_update_info(self):
+        """Возвращает информацию об обновлении"""
+        return {
+            'current_version': self.current_version,
+            'latest_version': self.latest_version,
+            'update_available': self.update_available
+        }
+    
+    def set_update_button(self, button):
+        """Устанавливает кнопку обновления"""
+        self.update_button = button
+    
+    def hide_update_button(self):
+        """Скрывает кнопку обновления"""
+        if self.update_button:
+            self.update_button.hide()
+    
+    def show_update_button(self):
+        """Показывает кнопку обновления"""
+        if self.update_button and self.update_available:
+            self.update_button.show()
+
+class UpdateButton(QPushButton):
+    """Золотая кнопка обновления"""
+    
+    def __init__(self, text="", parent=None):
+        super().__init__(text, parent)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.corner_radius = 15
+        
+        # Золотые цвета
+        self.normal_color = QColor(255, 215, 0, 120)
+        self.hover_color = QColor(255, 215, 0, 180)
+        self.pressed_color = QColor(255, 215, 0, 150)
+        self.border_color = QColor(255, 215, 0, 200)
+        self.text_color = QColor(255, 255, 255)
+        
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+        # Выбираем цвет в зависимости от состояния
+        if self.isDown():
+            bg_color = self.pressed_color
+        elif self.underMouse():
+            bg_color = self.hover_color
+        else:
+            bg_color = self.normal_color
+        
+        # Рисуем закругленный прямоугольник с золотым градиентом
+        path = QPainterPath()
+        path.addRoundedRect(1, 1, self.width()-2, self.height()-2, 
+                           self.corner_radius, self.corner_radius)
+        
+        # Градиент для золотого эффекта
+        gradient = QLinearGradient(0, 0, self.width(), self.height())
+        gradient.setColorAt(0, QColor(255, 215, 0, 150))
+        gradient.setColorAt(1, QColor(255, 165, 0, 150))
+        
+        painter.fillPath(path, gradient)
+        
+        # Граница
+        painter.strokePath(path, self.border_color)
+        
+        # Текст
+        painter.setPen(self.text_color)
+        painter.setFont(QFont("Arial", 10, QFont.Weight.Bold))
+        painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, self.text())
+
+class GlassFrame(QFrame):
+    """Кастомный фрейм с эффектом стекла"""
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.blur_radius = 20
+        self.corner_radius = 20
+        self.glass_color = QColor(255, 255, 255, 30)
+        self.border_color = QColor(255, 255, 255, 80)
+        
+    def set_glass_style(self, glass_color: QColor, border_color: QColor):
+        """Устанавливает цвет стекла"""
+        self.glass_color = glass_color
+        self.border_color = border_color
+        self.update()
+        
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+        # Создаем путь с закругленными углами
+        path = QPainterPath()
+        path.addRoundedRect(0, 0, self.width(), self.height(), 
+                           self.corner_radius, self.corner_radius)
+        
+        # Полупрозрачный фон с размытием
+        painter.setClipPath(path)
+        painter.fillRect(self.rect(), self.glass_color)
+        
+        # Граница
+        painter.strokePath(path, self.border_color)
+
+class GlassButton(QPushButton):
+    """Стеклянная кнопка"""
+    
+    def __init__(self, text="", parent=None):
+        super().__init__(text, parent)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.corner_radius = 15
+        
+        # Цвета по умолчанию
+        self.normal_color = QColor(255, 255, 255, 80)
+        self.hover_color = QColor(255, 255, 255, 120)
+        self.pressed_color = QColor(255, 255, 255, 100)
+        self.border_color = QColor(255, 255, 255, 120)
+        self.text_color = QColor(255, 255, 255)
+        
+    def set_glass_style(self, normal_color: QColor, hover_color: QColor, 
+                       pressed_color: QColor, border_color: QColor, text_color: QColor):
+        """Устанавливает цвета стекла"""
+        self.normal_color = normal_color
+        self.hover_color = hover_color
+        self.pressed_color = pressed_color
+        self.border_color = border_color
+        self.text_color = text_color
+        self.update()
+        
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+        # Выбираем цвет в зависимости от состояния
+        if self.isDown():
+            bg_color = self.pressed_color
+        elif self.underMouse():
+            bg_color = self.hover_color
+        else:
+            bg_color = self.normal_color
+        
+        # Рисуем закругленный прямоугольник
+        path = QPainterPath()
+        path.addRoundedRect(1, 1, self.width()-2, self.height()-2, 
+                           self.corner_radius, self.corner_radius)
+        
+        painter.fillPath(path, bg_color)
+        
+        # Граница
+        painter.strokePath(path, self.border_color)
+        
+        # Текст
+        painter.setPen(self.text_color)
+        painter.setFont(self.font())
+        painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, self.text())
+
+class StaticGlassButton(QPushButton):
+    """Статическая стеклянная кнопка без анимации - для настроек"""
+    
+    def __init__(self, text="", parent=None):
+        super().__init__(text, parent)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.corner_radius = 15
+        
+        # Цвета по умолчанию
+        self.normal_color = QColor(255, 255, 255, 80)
+        self.hover_color = QColor(255, 255, 255, 120)
+        self.pressed_color = QColor(255, 255, 255, 100)
+        self.border_color = QColor(255, 255, 255, 120)
+        self.text_color = QColor(255, 255, 255)
+        
+    def set_glass_style(self, normal_color: QColor, hover_color: QColor, 
+                       pressed_color: QColor, border_color: QColor, text_color: QColor):
+        """Устанавливает цвета стекла"""
+        self.normal_color = normal_color
+        self.hover_color = hover_color
+        self.pressed_color = pressed_color
+        self.border_color = border_color
+        self.text_color = text_color
+        self.update()
+        
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+        # Выбираем цвет в зависимости от состояния
+        if self.isDown():
+            bg_color = self.pressed_color
+        elif self.underMouse():
+            bg_color = self.hover_color
+        else:
+            bg_color = self.normal_color
+        
+        # Рисуем закругленный прямоугольник
+        path = QPainterPath()
+        path.addRoundedRect(1, 1, self.width()-2, self.height()-2, 
+                           self.corner_radius, self.corner_radius)
+        
+        painter.fillPath(path, bg_color)
+        
+        # Граница
+        painter.strokePath(path, self.border_color)
+        
+        # Текст
+        painter.setPen(self.text_color)
+        painter.setFont(self.font())
+        painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, self.text())
+
+@dataclass
+class Game:
+    """Класс для представления игровых данных"""
+    title: str
+    description: str
+    genre: str
+    rating: float = 0.0
+    is_installed: bool = False
+    in_library: bool = False
+    download_url: str = ""  # Прямая ссылка для скачивания
+    file_size: str = ""  # Размер файла
+    executable_path: str = ""  # Путь к исполняемому файлу игры
+    avatar_url: str = ""  # URL аватарки игры
+    screenshots: List[str] = None  # Список скриншотов
+    video_urls: List[str] = None  # Список URL видео
+    # Системные требования
+    min_os: str = "Windows 10"
+    min_processor: str = "Intel Core i5"
+    min_memory: str = "8 GB RAM"
+    min_graphics: str = "NVIDIA GeForce GTX 960"
+    min_storage: str = "50 GB"
+    rec_os: str = "Windows 11"
+    rec_processor: str = "Intel Core i7"
+    rec_memory: str = "16 GB RAM"
+    rec_graphics: str = "NVIDIA GeForce RTX 2060"
+    rec_storage: str = "50 GB"
+    
+    def __post_init__(self):
+        if self.screenshots is None:
+            self.screenshots = []
+        if self.video_urls is None:
+            self.video_urls = []
+
+class SettingsManager:
+    """Менеджер настроек приложения"""
+    
+    def __init__(self):
+        # Создаем директорию для настроек
+        app_data_path = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppDataLocation)
+        self.settings_dir = os.path.join(app_data_path, "GameNexusPro")
+        if not os.path.exists(self.settings_dir):
+            os.makedirs(self.settings_dir)
+        
+        self.settings_file = os.path.join(self.settings_dir, "settings.json")
+        self.settings = self.load_settings()
+    
+    def load_settings(self) -> dict:
+        default_settings = self.get_default_settings()
+        try:
+            if os.path.exists(self.settings_file):
+                with open(self.settings_file, 'r', encoding='utf-8') as f:
+                    loaded_settings = json.load(f)
+                    default_settings.update(loaded_settings)
+        except Exception as e:
+            print(f"Ошибка загрузки настроек: {e}")
+        return default_settings
+    
+    def save_settings(self):
+        try:
+            with open(self.settings_file, 'w', encoding='utf-8') as f:
+                json.dump(self.settings, f, indent=4, ensure_ascii=False)
+        except Exception as e:
+            print(f"Ошибка сохранения настроек: {e}")
+    
+    def get_default_settings(self) -> dict:
+        return {
+            "theme": "glass",
+            "fullscreen": False,
+            "window_size": [1400, 800],
+            "window_position": [100, 100],
+            "qbittorrent_path": "qbittorrent.exe",
+            "user_games": [],
+            "library_games": [],
+            "app_version": "1.0.0",
+            "update_notified": False
+        }
+    
+    def get_setting(self, key: str, default=None):
+        return self.settings.get(key, default)
+    
+    def set_setting(self, key: str, value):
+        self.settings[key] = value
+        self.save_settings()
+    
+    def save_user_game(self, game: Game):
+        user_games = self.get_setting("user_games", [])
+        for i, existing_game in enumerate(user_games):
+            if existing_game.get('title') == game.title:
+                user_games[i] = asdict(game)
+                break
+        else:
+            user_games.append(asdict(game))
+        self.set_setting("user_games", user_games)
+    
+    def get_user_games(self) -> List[Game]:
+        user_games_data = self.get_setting("user_games", [])
+        user_games = []
+        for game_data in user_games_data:
+            try:
+                user_games.append(Game(**game_data))
+            except Exception as e:
+                print(f"Ошибка создания игры из данных: {e}")
+        return user_games
+    
+    def save_library_game(self, game: Game):
+        library_games = self.get_setting("library_games", [])
+        for i, existing_game in enumerate(library_games):
+            if existing_game.get('title') == game.title:
+                library_games[i] = asdict(game)
+                break
+        else:
+            library_games.append(asdict(game))
+        self.set_setting("library_games", library_games)
+    
+    def get_library_games(self) -> List[Game]:
+        library_games_data = self.get_setting("library_games", [])
+        library_games = []
+        for game_data in library_games_data:
+            try:
+                library_games.append(Game(**game_data))
+            except Exception as e:
+                print(f"Ошибка создания игры из данных библиотеки: {e}")
+        return library_games
+    
+    def remove_library_game(self, game_title: str):
+        library_games = self.get_setting("library_games", [])
+        library_games = [game for game in library_games if game.get('title') != game_title]
+        self.set_setting("library_games", library_games)
+
+class ThemeManager:
+    def __init__(self, settings_manager: SettingsManager):
+        self.settings_manager = settings_manager
+        self.themes = {
+            "glass": {
+                "name": "🔮 Жидкое стекло",
+                "primary": "rgba(107, 142, 255, 0.8)",
+                "secondary": "rgba(30, 41, 59, 0.6)", 
+                "background": "qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 rgba(15, 23, 42, 0.9), stop:1 rgba(30, 41, 59, 0.9))",
+                "text": "#ffffff",
+                "accent": "rgba(139, 92, 246, 0.7)",
+                "card_bg": "rgba(255, 255, 255, 0.1)",
+                "card_border": "rgba(255, 255, 255, 0.2)",
+                "sidebar_bg": "rgba(15, 23, 42, 0.7)",
+                "header_bg": "rgba(107, 142, 255, 0.3)",
+                "glass_color": QColor(255, 255, 255, 30),
+                "glass_border": QColor(255, 255, 255, 80),
+                "button_normal": QColor(255, 255, 255, 80),
+                "button_hover": QColor(255, 255, 255, 120),
+                "button_pressed": QColor(255, 255, 255, 100),
+                "button_border": QColor(255, 255, 255, 120)
+            },
+            "dark": {
+                "name": "🌙 Темная",
+                "primary": "#ff6b6b",
+                "secondary": "#16213e", 
+                "background": "#1a1a2e",
+                "text": "#ffffff",
+                "accent": "#0f3460",
+                "card_bg": "rgba(255, 255, 255, 0.05)",
+                "card_border": "rgba(255, 255, 255, 0.1)",
+                "sidebar_bg": "qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #1a1a2e, stop:1 #16213e)",
+                "header_bg": "qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 107, 107, 0.3), stop:1 rgba(15, 52, 96, 0.3))",
+                "glass_color": QColor(255, 107, 107, 40),
+                "glass_border": QColor(255, 107, 107, 100),
+                "button_normal": QColor(255, 107, 107, 60),
+                "button_hover": QColor(255, 107, 107, 100),
+                "button_pressed": QColor(255, 107, 107, 80),
+                "button_border": QColor(255, 107, 107, 120)
+            },
+            "blue": {
+                "name": "🔵 Синяя",
+                "primary": "#4d8bff",
+                "secondary": "#1e3a8a",
+                "background": "#1e40af", 
+                "text": "#ffffff",
+                "accent": "#3b82f6",
+                "card_bg": "rgba(255, 255, 255, 0.08)",
+                "card_border": "rgba(255, 255, 255, 0.15)",
+                "sidebar_bg": "qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #1e40af, stop:1 #1e3a8a)",
+                "header_bg": "qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(77, 139, 255, 0.4), stop:1 rgba(30, 58, 138, 0.4))",
+                "glass_color": QColor(77, 139, 255, 40),
+                "glass_border": QColor(77, 139, 255, 100),
+                "button_normal": QColor(77, 139, 255, 60),
+                "button_hover": QColor(77, 139, 255, 100),
+                "button_pressed": QColor(77, 139, 255, 80),
+                "button_border": QColor(77, 139, 255, 120)
+            },
+            "purple": {
+                "name": "🟣 Фиолетовая",
+                "primary": "rgba(139, 92, 246, 0.8)",
+                "secondary": "rgba(76, 29, 149, 0.6)",
+                "background": "qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 rgba(67, 21, 139, 0.9), stop:1 rgba(91, 33, 182, 0.9))",
+                "text": "#ffffff",
+                "accent": "rgba(192, 132, 252, 0.7)",
+                "card_bg": "rgba(255, 255, 255, 0.1)",
+                "card_border": "rgba(255, 255, 255, 0.2)",
+                "sidebar_bg": "rgba(67, 21, 139, 0.7)",
+                "header_bg": "rgba(139, 92, 246, 0.3)",
+                "glass_color": QColor(139, 92, 246, 30),
+                "glass_border": QColor(139, 92, 246, 80),
+                "button_normal": QColor(139, 92, 246, 80),
+                "button_hover": QColor(139, 92, 246, 120),
+                "button_pressed": QColor(139, 92, 246, 100),
+                "button_border": QColor(139, 92, 246, 120)
+            },
+            "green": {
+                "name": "🟢 Зеленая",
+                "primary": "rgba(34, 197, 94, 0.8)",
+                "secondary": "rgba(21, 128, 61, 0.6)",
+                "background": "qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 rgba(20, 83, 45, 0.9), stop:1 rgba(22, 101, 52, 0.9))",
+                "text": "#ffffff",
+                "accent": "rgba(74, 222, 128, 0.7)",
+                "card_bg": "rgba(255, 255, 255, 0.1)",
+                "card_border": "rgba(255, 255, 255, 0.2)",
+                "sidebar_bg": "rgba(20, 83, 45, 0.7)",
+                "header_bg": "rgba(34, 197, 94, 0.3)",
+                "glass_color": QColor(34, 197, 94, 30),
+                "glass_border": QColor(34, 197, 94, 80),
+                "button_normal": QColor(34, 197, 94, 80),
+                "button_hover": QColor(34, 197, 94, 120),
+                "button_pressed": QColor(34, 197, 94, 100),
+                "button_border": QColor(34, 197, 94, 120)
+            },
+            "orange": {
+                "name": "🟠 Оранжевая",
+                "primary": "rgba(249, 115, 22, 0.8)",
+                "secondary": "rgba(194, 65, 12, 0.6)",
+                "background": "qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 rgba(154, 52, 18, 0.9), stop:1 rgba(194, 65, 12, 0.9))",
+                "text": "#ffffff",
+                "accent": "rgba(251, 146, 60, 0.7)",
+                "card_bg": "rgba(255, 255, 255, 0.1)",
+                "card_border": "rgba(255, 255, 255, 0.2)",
+                "sidebar_bg": "rgba(154, 52, 18, 0.7)",
+                "header_bg": "rgba(249, 115, 22, 0.3)",
+                "glass_color": QColor(249, 115, 22, 30),
+                "glass_border": QColor(249, 115, 22, 80),
+                "button_normal": QColor(249, 115, 22, 80),
+                "button_hover": QColor(249, 115, 22, 120),
+                "button_pressed": QColor(249, 115, 22, 100),
+                "button_border": QColor(249, 115, 22, 120)
+            },
+            "pink": {
+                "name": "🌸 Розовая",
+                "primary": "rgba(236, 72, 153, 0.8)",
+                "secondary": "rgba(190, 24, 93, 0.6)",
+                "background": "qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 rgba(157, 23, 77, 0.9), stop:1 rgba(190, 24, 93, 0.9))",
+                "text": "#ffffff",
+                "accent": "rgba(244, 114, 182, 0.7)",
+                "card_bg": "rgba(255, 255, 255, 0.1)",
+                "card_border": "rgba(255, 255, 255, 0.2)",
+                "sidebar_bg": "rgba(157, 23, 77, 0.7)",
+                "header_bg": "rgba(236, 72, 153, 0.3)",
+                "glass_color": QColor(236, 72, 153, 30),
+                "glass_border": QColor(236, 72, 153, 80),
+                "button_normal": QColor(236, 72, 153, 80),
+                "button_hover": QColor(236, 72, 153, 120),
+                "button_pressed": QColor(236, 72, 153, 100),
+                "button_border": QColor(236, 72, 153, 120)
+            },
+            "cyber": {
+                "name": "👾 Киберпанк",
+                "primary": "rgba(16, 185, 129, 0.8)",
+                "secondary": "rgba(5, 150, 105, 0.6)",
+                "background": "qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 rgba(4, 120, 87, 0.9), stop:1 rgba(6, 95, 70, 0.9))",
+                "text": "#00ff88",
+                "accent": "rgba(110, 231, 183, 0.7)",
+                "card_bg": "rgba(0, 255, 136, 0.05)",
+                "card_border": "rgba(0, 255, 136, 0.2)",
+                "sidebar_bg": "rgba(4, 120, 87, 0.7)",
+                "header_bg": "rgba(16, 185, 129, 0.3)",
+                "glass_color": QColor(0, 255, 136, 20),
+                "glass_border": QColor(0, 255, 136, 60),
+                "button_normal": QColor(0, 255, 136, 60),
+                "button_hover": QColor(0, 255, 136, 100),
+                "button_pressed": QColor(0, 255, 136, 80),
+                "button_border": QColor(0, 255, 136, 100)
+            },
+            "gold": {
+                "name": "🌟 Золотая",
+                "primary": "rgba(245, 158, 11, 0.8)",
+                "secondary": "rgba(180, 83, 9, 0.6)",
+                "background": "qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 rgba(120, 53, 15, 0.9), stop:1 rgba(146, 64, 14, 0.9))",
+                "text": "#ffd700",
+                "accent": "rgba(251, 191, 36, 0.7)",
+                "card_bg": "rgba(255, 215, 0, 0.05)",
+                "card_border": "rgba(255, 215, 0, 0.2)",
+                "sidebar_bg": "rgba(120, 53, 15, 0.7)",
+                "header_bg": "rgba(245, 158, 11, 0.3)",
+                "glass_color": QColor(255, 215, 0, 20),
+                "glass_border": QColor(255, 215, 0, 60),
+                "button_normal": QColor(255, 215, 0, 60),
+                "button_hover": QColor(255, 215, 0, 100),
+                "button_pressed": QColor(255, 215, 0, 80),
+                "button_border": QColor(255, 215, 0, 100)
+            },
+            "midnight": {
+                "name": "🌌 Полночь",
+                "primary": "rgba(99, 102, 241, 0.8)",
+                "secondary": "rgba(67, 56, 202, 0.6)",
+                "background": "qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 rgba(30, 27, 75, 0.9), stop:1 rgba(49, 46, 129, 0.9))",
+                "text": "#e0e7ff",
+                "accent": "rgba(129, 140, 248, 0.7)",
+                "card_bg": "rgba(224, 231, 255, 0.05)",
+                "card_border": "rgba(224, 231, 255, 0.15)",
+                "sidebar_bg": "rgba(30, 27, 75, 0.7)",
+                "header_bg": "rgba(99, 102, 241, 0.3)",
+                "glass_color": QColor(99, 102, 241, 25),
+                "glass_border": QColor(99, 102, 241, 70),
+                "button_normal": QColor(99, 102, 241, 60),
+                "button_hover": QColor(99, 102, 241, 100),
+                "button_pressed": QColor(99, 102, 241, 80),
+                "button_border": QColor(99, 102, 241, 100)
+            }
+        }
+    
+    def get_theme(self) -> dict:
+        theme_name = self.settings_manager.get_setting("theme", "glass")
+        return self.themes.get(theme_name, self.themes["glass"])
+    
+    def set_theme(self, theme_name: str):
+        if theme_name in self.themes:
+            self.settings_manager.set_setting("theme", theme_name)
+    
+    def get_theme_names(self) -> List[str]:
+        return list(self.themes.keys())
+    
+    def get_theme_display_names(self) -> List[str]:
+        return [theme["name"] for theme in self.themes.values()]
+    
+    def apply_theme_to_app(self, app: QApplication):
+        """Применяет тему ко всему приложению"""
+        theme = self.get_theme()
+        
+        # Базовые стили для всего приложения
+        base_stylesheet = f"""
+            QMainWindow, QWidget {{
+                background: {theme['background']};
+                color: {theme['text']};
+                font-family: "Segoe UI", Arial, sans-serif;
+                border: none;
+            }}
+            
+            QScrollArea {{
+                background: transparent;
+                border: none;
+            }}
+            
+            QScrollBar:vertical {{
+                background: rgba(255, 255, 255, 0.1);
+                width: 12px;
+                margin: 0px;
+                border-radius: 6px;
+            }}
+            
+            QScrollBar::handle:vertical {{
+                background: {theme['primary']};
+                border-radius: 6px;
+                min-height: 20px;
+            }}
+            
+            QScrollBar::handle:vertical:hover {{
+                background: {theme['accent']};
+            }}
+            
+            QPushButton {{
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 {theme['primary']}, stop:1 {theme['accent']});
+                color: white;
+                border: none;
+                border-radius: 15px;
+                font-size: 14px;
+                font-weight: bold;
+                padding: 12px 20px;
+            }}
+            
+            QPushButton:hover {{
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 {theme['accent']}, stop:1 {theme['primary']});
+            }}
+            
+            QPushButton:pressed {{
+                background: {theme['secondary']};
+            }}
+            
+            QComboBox {{
+                background: rgba(255, 255, 255, 0.1);
+                color: {theme['text']};
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 10px;
+                padding: 10px;
+                min-width: 150px;
+            }}
+            
+            QComboBox::drop-down {{
+                border: none;
+            }}
+            
+            QComboBox::down-arrow {{
+                image: none;
+                border-left: 1px solid rgba(255, 255, 255, 0.3);
+                padding: 0px 8px;
+            }}
+            
+            QProgressBar {{
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 10px;
+                color: white;
+                text-align: center;
+            }}
+            
+            QProgressBar::chunk {{
+                background: qlineargradient(x1:0, y1:0, x1:1, y1:0, stop:0 {theme['primary']}, stop:0.5 {theme['accent']}, stop:1 {theme['primary']});
+                border-radius: 8px;
+            }}
+            
+            QFrame {{
+                background: transparent;
+                border: none;
+            }}
+        """
+        app.setStyleSheet(base_stylesheet)
+
+class MediaManager:
+    def __init__(self):
+        self.session = requests.Session()
+        self.image_cache = {}  # Кэш для загруженных изображений
+    
+    def load_avatar(self, game: Game, avatar_label: QLabel, default_icon: str = "🎮"):
+        try:
+            # Проверяем кэш
+            cache_key = f"avatar_{game.title}"
+            if cache_key in self.image_cache:
+                pixmap = self.image_cache[cache_key]
+                self.set_avatar_pixmap(avatar_label, pixmap)
+                return
+            
+            if game.avatar_url and game.avatar_url.startswith(('http://', 'https://')):
+                print(f"Загрузка аватарки по URL: {game.avatar_url}")
+                try:
+                    response = self.session.get(game.avatar_url, timeout=10)
+                    if response.status_code == 200:
+                        image_data = response.content
+                        image = QImage()
+                        image.loadFromData(image_data)
+                        
+                        if not image.isNull():
+                            pixmap = QPixmap.fromImage(image)
+                            # Сохраняем в кэш
+                            self.image_cache[cache_key] = pixmap
+                            self.set_avatar_pixmap(avatar_label, pixmap)
+                            print(f"Аватарка успешно загружена: {game.title}")
+                            return
+                        else:
+                            print(f"Неверный формат изображения для {game.title}")
+                    else:
+                        print(f"Ошибка HTTP {response.status_code} для {game.avatar_url}")
+                except Exception as e:
+                    print(f"Ошибка загрузки аватарки по URL {game.avatar_url}: {e}")
+            
+            print(f"Используется аватарка по умолчанию для: {game.title}")
+            self.set_default_avatar(avatar_label, default_icon)
+            
+        except Exception as e:
+            print(f"Критическая ошибка загрузки аватарки для {game.title}: {e}")
+            self.set_default_avatar(avatar_label, default_icon)
+    
+    def load_screenshot(self, screenshot_url: str, screenshot_label: QLabel, default_text: str = "📷"):
+        try:
+            # Проверяем кэш
+            cache_key = f"screenshot_{screenshot_url}"
+            if cache_key in self.image_cache:
+                pixmap = self.image_cache[cache_key]
+                self.set_screenshot_pixmap(screenshot_label, pixmap)
+                return True
+            
+            if screenshot_url and screenshot_url.startswith(('http://', 'https://')):
+                response = self.session.get(screenshot_url, timeout=10)
+                if response.status_code == 200:
+                    image_data = response.content
+                    image = QImage()
+                    image.loadFromData(image_data)
+                    
+                    if not image.isNull():
+                        pixmap = QPixmap.fromImage(image)
+                        # Сохраняем в кэш
+                        self.image_cache[cache_key] = pixmap
+                        self.set_screenshot_pixmap(screenshot_label, pixmap)
+                        return True
+            
+            self.set_default_screenshot(screenshot_label, default_text)
+            return False
+            
+        except Exception as e:
+            print(f"Ошибка загрузки скриншота {screenshot_url}: {e}")
+            self.set_default_screenshot(screenshot_label, default_text)
+            return False
+    
+    def set_avatar_pixmap(self, avatar_label: QLabel, pixmap: QPixmap):
+        try:
+            # Устанавливаем фиксированный размер для аватарки
+            target_size = QSize(120, 120)
+            
+            # Создаем круглую маску для аватарки
+            rounded_pixmap = self.create_rounded_pixmap(pixmap, target_size)
+            
+            avatar_label.setPixmap(rounded_pixmap)
+            avatar_label.setFixedSize(target_size)
+            avatar_label.setStyleSheet("""
+                QLabel {
+                    background: transparent;
+                    border: none;
+                }
+            """)
+        except Exception as e:
+            print(f"Ошибка установки аватарки: {e}")
+            self.set_default_avatar(avatar_label, "🎮")
+    
+    def create_rounded_pixmap(self, pixmap: QPixmap, size: QSize) -> QPixmap:
+        """Создает круглую аватарку с правильным масштабированием"""
+        # Масштабируем изображение с сохранением пропорций и обрезкой
+        scaled_pixmap = pixmap.scaled(
+            size.width(), 
+            size.height(), 
+            Qt.AspectRatioMode.KeepAspectRatioByExpanding,
+            Qt.TransformationMode.SmoothTransformation
+        )
+        
+        # Создаем круглую маску
+        rounded_pixmap = QPixmap(size)
+        rounded_pixmap.fill(Qt.GlobalColor.transparent)
+        
+        painter = QPainter(rounded_pixmap)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+        # Создаем круглый путь
+        path = QPainterPath()
+        path.addEllipse(0, 0, size.width(), size.height())
+        painter.setClipPath(path)
+        
+        # Центрируем изображение
+        x = (scaled_pixmap.width() - size.width()) // 2
+        y = (scaled_pixmap.height() - size.height()) // 2
+        painter.drawPixmap(0, 0, scaled_pixmap, x, y, size.width(), size.height())
+        
+        painter.end()
+        return rounded_pixmap
+    
+    def set_screenshot_pixmap(self, screenshot_label: QLabel, pixmap: QPixmap):
+        try:
+            # Устанавливаем фиксированный размер для скриншота
+            target_size = QSize(560, 360)
+            scaled_pixmap = pixmap.scaled(
+                target_size,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation
+            )
+            screenshot_label.setPixmap(scaled_pixmap)
+            screenshot_label.setFixedSize(target_size)
+        except Exception as e:
+            print(f"Ошибка установки скриншота: {e}")
+            self.set_default_screenshot(screenshot_label, "📷")
+    
+    def set_default_avatar(self, avatar_label: QLabel, icon: str):
+        avatar_label.clear()
+        avatar_label.setText(icon)
+        avatar_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        avatar_label.setStyleSheet("""
+            QLabel {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(107, 142, 255, 0.3), stop:1 rgba(139, 92, 246, 0.3));
+                border: 3px solid rgba(255, 255, 255, 0.2);
+                border-radius: 60px;
+                font-size: 60px;
+                color: white;
+            }
+        """)
+        avatar_label.setFixedSize(120, 120)
+    
+    def set_default_screenshot(self, screenshot_label: QLabel, text: str):
+        screenshot_label.clear()
+        screenshot_label.setText(text)
+        screenshot_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        screenshot_label.setStyleSheet("""
+            QLabel {
+                background: rgba(0, 0, 0, 0.3);
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                border-radius: 15px;
+                font-size: 40px;
+                color: white;
+            }
+        """)
+        screenshot_label.setFixedSize(560, 360)
+
+class YouTubePlayer(QWebEngineView):
+    """Встроенный YouTube плеер"""
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedSize(560, 360)
+        self.setStyleSheet("""
+            QWebEngineView {
+                background: black;
+                border: none;
+                border-radius: 15px;
+            }
+        """)
+        
+        # Настройки для лучшей производительности
+        self.settings().setAttribute(QWebEngineSettings.WebAttribute.PlaybackRequiresUserGesture, False)
+        self.settings().setAttribute(QWebEngineSettings.WebAttribute.AllowRunningInsecureContent, True)
+        self.settings().setAttribute(QWebEngineSettings.WebAttribute.AllowWindowActivationFromJavaScript, True)
+    
+    def load_youtube_video(self, youtube_url: str):
+        """Загружает YouTube видео для встроенного воспроизведения"""
+        try:
+            video_id = self.extract_video_id(youtube_url)
+            if not video_id:
+                print(f"Не удалось извлечь ID видео из URL: {youtube_url}")
+                return False
+            
+            # Создаем embed URL для встроенного воспроизведения
+            embed_url = f"https://www.youtube.com/embed/{video_id}?autoplay=1&rel=0&modestbranding=1"
+            
+            print(f"Загрузка YouTube видео: {embed_url}")
+            self.load(QUrl(embed_url))
+            return True
+            
+        except Exception as e:
+            print(f"Ошибка загрузки YouTube видео: {e}")
+            return False
+    
+    def extract_video_id(self, url: str) -> str:
+        """Извлекает ID видео из YouTube URL"""
+        try:
+            # Обработка различных форматов YouTube ссылок
+            if 'youtu.be/' in url:
+                return url.split('youtu.be/')[1].split('?')[0]
+            elif 'youtube.com/watch?v=' in url:
+                return url.split('v=')[1].split('&')[0]
+            elif 'youtube.com/embed/' in url:
+                return url.split('embed/')[1].split('?')[0]
+            elif 'youtube.com/v/' in url:
+                return url.split('v/')[1].split('?')[0]
+            return ""
+        except Exception as e:
+            print(f"Ошибка извлечения ID видео: {e}")
+            return ""
+    
+    def stop(self):
+        """Останавливает воспроизведение"""
+        try:
+            self.page().runJavaScript("""
+                var video = document.querySelector('video');
+                if (video) {
+                    video.pause();
+                    video.currentTime = 0;
+                }
+            """)
+        except Exception as e:
+            print(f"Ошибка остановки видео: {e}")
+
+class VideoPlayerWidget(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.media_player = QMediaPlayer()
+        self.audio_output = QAudioOutput()
+        self.video_widget = QVideoWidget()
+        
+        self.media_player.setAudioOutput(self.audio_output)
+        self.media_player.setVideoOutput(self.video_widget)
+        
+        self.setup_ui()
+        self.connect_signals()
+    
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        
+        # Видео виджет
+        self.video_widget.setFixedSize(560, 360)
+        self.video_widget.setStyleSheet("""
+            QVideoWidget {
+                background: black;
+                border: none;
+                border-radius: 15px;
+            }
+        """)
+        layout.addWidget(self.video_widget)
+        
+        # Панель управления
+        control_layout = QHBoxLayout()
+        control_layout.setContentsMargins(10, 5, 10, 5)
+        
+        self.play_pause_btn = QPushButton("⏸️")
+        self.play_pause_btn.setFixedSize(30, 30)
+        self.play_pause_btn.setStyleSheet("""
+            QPushButton {
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 15px;
+                color: white;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+        """)
+        self.play_pause_btn.clicked.connect(self.toggle_play_pause)
+        
+        self.progress_slider = QSlider(Qt.Orientation.Horizontal)
+        self.progress_slider.setStyleSheet("""
+            QSlider::groove:horizontal {
+                background: rgba(255, 255, 255, 0.1);
+                height: 4px;
+                border-radius: 2px;
+            }
+            QSlider::handle:horizontal {
+                background: rgba(107, 142, 255, 0.8);
+                width: 12px;
+                height: 12px;
+                border-radius: 6px;
+                margin: -4px 0;
+            }
+            QSlider::sub-page:horizontal {
+                background: rgba(107, 142, 255, 0.8);
+                border-radius: 2px;
+            }
+        """)
+        self.progress_slider.sliderMoved.connect(self.set_position)
+        
+        self.time_label = QLabel("00:00 / 00:00")
+        self.time_label.setStyleSheet("color: white; font-size: 12px;")
+        self.time_label.setFixedWidth(100)
+        
+        self.volume_slider = QSlider(Qt.Orientation.Horizontal)
+        self.volume_slider.setRange(0, 100)
+        self.volume_slider.setValue(50)
+        self.volume_slider.setFixedWidth(80)
+        self.volume_slider.setStyleSheet("""
+            QSlider::groove:horizontal {
+                background: rgba(255, 255, 255, 0.1);
+                height: 4px;
+                border-radius: 2px;
+            }
+            QSlider::handle:horizontal {
+                background: rgba(139, 92, 246, 0.7);
+                width: 12px;
+                height: 12px;
+                border-radius: 6px;
+                margin: -4px 0;
+            }
+            QSlider::sub-page:horizontal {
+                background: rgba(139, 92, 246, 0.7);
+                border-radius: 2px;
+            }
+        """)
+        self.volume_slider.valueChanged.connect(self.set_volume)
+        
+        control_layout.addWidget(self.play_pause_btn)
+        control_layout.addWidget(self.progress_slider)
+        control_layout.addWidget(self.time_label)
+        control_layout.addWidget(QLabel("🔊"))
+        control_layout.addWidget(self.volume_slider)
+        
+        layout.addLayout(control_layout)
+    
+    def connect_signals(self):
+        self.media_player.positionChanged.connect(self.position_changed)
+        self.media_player.durationChanged.connect(self.duration_changed)
+        self.media_player.playbackStateChanged.connect(self.playback_state_changed)
+        self.media_player.errorOccurred.connect(self.on_player_error)
+    
+    def toggle_play_pause(self):
+        if self.media_player.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
+            self.media_player.pause()
+        else:
+            self.media_player.play()
+    
+    def set_position(self, position):
+        self.media_player.setPosition(position)
+    
+    def set_volume(self, volume):
+        self.audio_output.setVolume(volume / 100)
+    
+    def position_changed(self, position):
+        self.progress_slider.setValue(position)
+        self.update_time_display()
+    
+    def duration_changed(self, duration):
+        self.progress_slider.setRange(0, duration)
+        self.update_time_display()
+    
+    def playback_state_changed(self, state):
+        if state == QMediaPlayer.PlaybackState.PlayingState:
+            self.play_pause_btn.setText("⏸️")
+        else:
+            self.play_pause_btn.setText("▶️")
+    
+    def on_player_error(self, error, error_string):
+        print(f"Ошибка медиаплеера: {error_string} (код: {error})")
+        self.show_error_message("Ошибка загрузки видео")
+    
+    def show_error_message(self, message: str):
+        self.video_widget.setStyleSheet("""
+            QVideoWidget {
+                background: black;
+                border: 2px solid rgba(255, 107, 107, 0.8);
+                border-radius: 15px;
+                color: white;
+                font-size: 16px;
+            }
+        """)
+    
+    def update_time_display(self):
+        duration = self.media_player.duration()
+        position = self.media_player.position()
+        
+        if duration > 0:
+            duration_min = duration // 60000
+            duration_sec = (duration % 60000) // 1000
+            position_min = position // 60000
+            position_sec = (position % 60000) // 1000
+            
+            self.time_label.setText(f"{position_min:02d}:{position_sec:02d} / {duration_min:02d}:{duration_sec:02d}")
+    
+    def load_video(self, video_url: str) -> bool:
+        try:
+            print(f"Попытка загрузить видео: {video_url}")
+            
+            # Останавливаем текущее воспроизведение
+            self.media_player.stop()
+            
+            if not video_url or not video_url.strip():
+                print("Пустой URL видео")
+                return False
+            
+            # Проверяем, является ли это YouTube ссылкой
+            if self.is_youtube_url(video_url):
+                print(f"Обнаружена YouTube ссылка: {video_url}")
+                return False  # Возвращаем False, чтобы переключиться на YouTube плеер
+            
+            # Обработка URL для обычных видео
+            processed_url = self.process_video_url(video_url)
+            if not processed_url:
+                print(f"Не удалось обработать URL: {video_url}")
+                return False
+            
+            print(f"Обработанный URL: {processed_url}")
+            
+            # Создаем QUrl
+            url = QUrl(processed_url)
+            if not url.isValid():
+                print(f"Некорректный URL: {processed_url}")
+                return False
+            
+            # Устанавливаем источник
+            self.media_player.setSource(url)
+            
+            # Проверяем, загрузилось ли видео
+            if self.media_player.source().isEmpty():
+                print("Источник видео пуст после установки")
+                return False
+            
+            print("Видео успешно загружено в медиаплеер")
+            
+            # Устанавливаем громкость
+            self.audio_output.setVolume(0.5)
+            
+            # Автоматически запускаем воспроизведение после загрузки
+            QTimer.singleShot(500, self.auto_play)
+            
+            return True
+            
+        except Exception as e:
+            print(f"Критическая ошибка загрузки видео: {e}")
+            return False
+
+    def is_youtube_url(self, url: str) -> bool:
+        """Проверяет, является ли ссылка YouTube ссылкой"""
+        youtube_domains = ['youtube.com', 'youtu.be', 'www.youtube.com']
+        return any(domain in url.lower() for domain in youtube_domains)
+
+    def auto_play(self):
+        try:
+            if (not self.media_player.source().isEmpty() and 
+                self.media_player.playbackState() != QMediaPlayer.PlaybackState.PlayingState):
+                print("Запуск автоматического воспроизведения...")
+                self.media_player.play()
+                
+        except Exception as e:
+            print(f"Ошибка автоматического воспроизведения: {e}")
+
+    def process_video_url(self, url: str) -> str:
+        try:
+            url = url.strip()
+            print(f"Обработка видео URL: {url}")
+            
+            # Обработка Google Drive ссылок
+            if 'drive.google.com' in url:
+                print("Обнаружена Google Drive ссылка, преобразование...")
+                direct_url = self.convert_google_drive_url(url)
+                if direct_url:
+                    print(f"Преобразованная ссылка: {direct_url}")
+                    return direct_url
+                else:
+                    print("Не удалось преобразовать Google Drive ссылку")
+                    return self.get_reliable_video_url()
+            
+            # Проверка на прямые видео файлы
+            if any(url.lower().endswith(ext) for ext in ['.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.webm']):
+                print(f"Прямая ссылка на видео: {url}")
+                return url
+            
+            # Для других онлайн видео пробуем прямую ссылку
+            print(f"Используется оригинальная ссылка: {url}")
+            return url
+            
+        except Exception as e:
+            print(f"Ошибка обработки видео URL: {e}")
+            return self.get_reliable_video_url()
+    
+    def convert_google_drive_url(self, url: str) -> str:
+        """Преобразует Google Drive ссылку в прямую ссылку для скачивания"""
+        try:
+            # Извлекаем ID файла из URL
+            file_id = None
+            if '/file/d/' in url:
+                file_id = url.split('/file/d/')[1].split('/')[0]
+            elif 'id=' in url:
+                file_id = url.split('id=')[1].split('&')[0]
+            
+            if file_id:
+                # Создаем прямую ссылку для скачивания
+                direct_url = f"https://drive.google.com/uc?export=download&id={file_id}"
+                print(f"Преобразованная Google Drive ссылка: {direct_url}")
+                return direct_url
+            else:
+                print("Не удалось извлечь ID файла из Google Drive ссылки")
+                return ""
+                
+        except Exception as e:
+            print(f"Ошибка преобразования Google Drive ссылки: {e}")
+            return ""
+    
+    def get_reliable_video_url(self) -> str:
+        """Возвращает надежные тестовые видео URL"""
+        reliable_videos = [
+            "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4", 
+            "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+            "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+            "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"
+        ]
+        return random.choice(reliable_videos)
+    
+    def stop(self):
+        self.media_player.stop()
+        print("Воспроизведение видео остановлено")
+    
+    def pause(self):
+        self.media_player.pause()
+        print("Воспроизведение видео приостановлено")
+
+class MediaGallery(QWidget):
+    """Улучшенная галерея медиа с видео и скриншотами"""
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.current_game = None
+        self.current_media_index = 0
+        self.media_manager = MediaManager()
+        self.setup_ui()
+    
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(15)
+        
+        # Заголовок
+        title_label = QLabel("📷 Медиа галерея")
+        title_label.setStyleSheet("""
+            QLabel {
+                color: white;
+                font-size: 18px;
+                font-weight: bold;
+                background: none;
+            }
+        """)
+        layout.addWidget(title_label)
+        
+        # Основной контент
+        self.content_stack = QStackedWidget()
+        
+        # Видео плеер для обычных видео
+        self.video_player = VideoPlayerWidget()
+        self.content_stack.addWidget(self.video_player)
+        
+        # YouTube плеер
+        self.youtube_player = YouTubePlayer()
+        self.content_stack.addWidget(self.youtube_player)
+        
+        # Скриншоты
+        self.screenshot_label = QLabel()
+        self.screenshot_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.screenshot_label.setStyleSheet("""
+            QLabel {
+                background: rgba(0, 0, 0, 0.3);
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                border-radius: 15px;
+                color: #cccccc;
+                font-size: 16px;
+            }
+        """)
+        self.screenshot_label.setFixedSize(560, 360)
+        self.content_stack.addWidget(self.screenshot_label)
+        
+        layout.addWidget(self.content_stack)
+        
+        # Навигация
+        nav_layout = QHBoxLayout()
+        nav_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        self.prev_btn = QPushButton("◀️ Назад")
+        self.prev_btn.setFixedHeight(35)
+        self.prev_btn.setStyleSheet("""
+            QPushButton {
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 10px;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+        """)
+        self.prev_btn.clicked.connect(self.previous_media)
+        
+        self.media_info = QLabel("Медиа 0/0")
+        self.media_info.setStyleSheet("color: #cccccc; font-size: 14px;")
+        self.media_info.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        self.next_btn = QPushButton("Вперед ▶️")
+        self.next_btn.setFixedHeight(35)
+        self.next_btn.setStyleSheet("""
+            QPushButton {
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 10px;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+        """)
+        self.next_btn.clicked.connect(self.next_media)
+        
+        nav_layout.addWidget(self.prev_btn)
+        nav_layout.addWidget(self.media_info)
+        nav_layout.addWidget(self.next_btn)
+        
+        layout.addLayout(nav_layout)
+        
+        # Переключатель типа медиа
+        type_layout = QHBoxLayout()
+        type_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        self.video_btn = QPushButton("🎥 Видео")
+        self.video_btn.setCheckable(True)
+        self.video_btn.setChecked(True)
+        self.video_btn.setFixedHeight(35)
+        
+        self.screenshot_btn = QPushButton("📷 Скриншоты")
+        self.screenshot_btn.setCheckable(True)
+        self.screenshot_btn.setFixedHeight(35)
+        
+        # Стили для кнопок переключения
+        button_style = """
+            QPushButton {
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 10px;
+                font-size: 12px;
+                padding: 8px 15px;
+            }
+            QPushButton:checked {
+                background: rgba(107, 142, 255, 0.6);
+                border: 1px solid rgba(107, 142, 255, 0.8);
+            }
+            QPushButton:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+        """
+        self.video_btn.setStyleSheet(button_style)
+        self.screenshot_btn.setStyleSheet(button_style)
+        
+        self.video_btn.clicked.connect(lambda: self.switch_media_type("video"))
+        self.screenshot_btn.clicked.connect(lambda: self.switch_media_type("screenshots"))
+        
+        type_layout.addWidget(self.video_btn)
+        type_layout.addWidget(self.screenshot_btn)
+        
+        layout.addLayout(type_layout)
+        
+        self.current_media_type = "video"
+        self.update_navigation()
+    
+    def load_media(self, game):
+        """Загружает медиа для игры"""
+        self.current_game = game
+        self.current_media_index = 0
+        
+        print(f"Загрузка медиа для {game.title}:")
+        print(f"- Видео: {len(game.video_urls)}")
+        print(f"- Скриншоты: {len(game.screenshots)}")
+        
+        # Загружаем первое доступное медиа
+        if game.video_urls:
+            self.switch_to_video(0)
+        elif game.screenshots:
+            self.switch_to_screenshot(0)
+        else:
+            self.show_no_media()
+        
+        self.update_navigation()
+    
+    def switch_media_type(self, media_type):
+        """Переключает тип медиа"""
+        self.current_media_type = media_type
+        
+        if media_type == "video":
+            self.video_btn.setChecked(True)
+            self.screenshot_btn.setChecked(False)
+            if self.current_game and self.current_game.video_urls:
+                self.switch_to_video(0)
+            else:
+                self.show_no_media()
+        else:
+            self.video_btn.setChecked(False)
+            self.screenshot_btn.setChecked(True)
+            if self.current_game and self.current_game.screenshots:
+                self.switch_to_screenshot(0)
+            else:
+                self.show_no_media()
+        
+        self.current_media_index = 0
+        self.update_navigation()
+    
+    def switch_to_video(self, index):
+        """Переключает на видео"""
+        if not self.current_game or not self.current_game.video_urls:
+            return
+            
+        if 0 <= index < len(self.current_game.video_urls):
+            self.current_media_index = index
+            video_url = self.current_game.video_urls[index]
+            print(f"Загрузка видео {index + 1}/{len(self.current_game.video_urls)}: {video_url}")
+            
+            # Проверяем, является ли это YouTube ссылкой
+            if self.is_youtube_url(video_url):
+                print("Обнаружена YouTube ссылка, используем YouTube плеер")
+                success = self.youtube_player.load_youtube_video(video_url)
+                if success:
+                    self.content_stack.setCurrentWidget(self.youtube_player)
+                    print("YouTube видео успешно загружено")
+                else:
+                    self.screenshot_label.setText(f"❌ Ошибка загрузки YouTube видео\n{video_url}")
+                    self.content_stack.setCurrentWidget(self.screenshot_label)
+            else:
+                # Обычное видео
+                success = self.video_player.load_video(video_url)
+                if success:
+                    self.content_stack.setCurrentWidget(self.video_player)
+                    print("Обычное видео успешно загружено")
+                else:
+                    self.screenshot_label.setText(f"❌ Ошибка загрузки видео\n{video_url}")
+                    self.content_stack.setCurrentWidget(self.screenshot_label)
+            
+            self.update_navigation()
+    
+    def is_youtube_url(self, url: str) -> bool:
+        """Проверяет, является ли ссылка YouTube ссылкой"""
+        youtube_domains = ['youtube.com', 'youtu.be', 'www.youtube.com']
+        return any(domain in url.lower() for domain in youtube_domains)
+    
+    def switch_to_screenshot(self, index):
+        """Переключает на скриншот"""
+        if not self.current_game or not self.current_game.screenshots:
+            return
+            
+        if 0 <= index < len(self.current_game.screenshots):
+            self.current_media_index = index
+            screenshot_url = self.current_game.screenshots[index]
+            print(f"Загрузка скриншота {index + 1}/{len(self.current_game.screenshots)}: {screenshot_url}")
+            
+            self.screenshot_label.setText("Загрузка скриншота...")
+            self.content_stack.setCurrentWidget(self.screenshot_label)
+            
+            # Загружаем скриншот
+            self.media_manager.load_screenshot(screenshot_url, self.screenshot_label)
+            
+            self.update_navigation()
+    
+    def previous_media(self):
+        """Переход к предыдущему медиа"""
+        if self.current_media_type == "video":
+            media_list = self.current_game.video_urls if self.current_game else []
+        else:
+            media_list = self.current_game.screenshots if self.current_game else []
+        
+        if not media_list:
+            return
+            
+        new_index = (self.current_media_index - 1) % len(media_list)
+        
+        if self.current_media_type == "video":
+            self.switch_to_video(new_index)
+        else:
+            self.switch_to_screenshot(new_index)
+    
+    def next_media(self):
+        """Переход к следующему медиа"""
+        if self.current_media_type == "video":
+            media_list = self.current_game.video_urls if self.current_game else []
+        else:
+            media_list = self.current_game.screenshots if self.current_game else []
+        
+        if not media_list:
+            return
+            
+        new_index = (self.current_media_index + 1) % len(media_list)
+        
+        if self.current_media_type == "video":
+            self.switch_to_video(new_index)
+        else:
+            self.switch_to_screenshot(new_index)
+    
+    def update_navigation(self):
+        """Обновляет навигацию"""
+        if self.current_media_type == "video":
+            media_list = self.current_game.video_urls if self.current_game else []
+            media_type = "Видео"
+        else:
+            media_list = self.current_game.screenshots if self.current_game else []
+            media_type = "Скриншот"
+        
+        if media_list:
+            self.media_info.setText(f"{media_type} {self.current_media_index + 1}/{len(media_list)}")
+            self.prev_btn.setEnabled(True)
+            self.next_btn.setEnabled(True)
+        else:
+            self.media_info.setText(f"{media_type} 0/0")
+            self.prev_btn.setEnabled(False)
+            self.next_btn.setEnabled(False)
+    
+    def show_no_media(self):
+        """Показывает сообщение об отсутствии медиа"""
+        self.screenshot_label.setText("📷 Медиа не найдено\n\nДля этой игры пока нет видео или скриншотов")
+        self.content_stack.setCurrentWidget(self.screenshot_label)
+        self.media_info.setText("Медиа не найдено")
+        self.prev_btn.setEnabled(False)
+        self.next_btn.setEnabled(False)
+    
+    def stop_video(self):
+        """Останавливает видео"""
+        self.video_player.stop()
+        self.youtube_player.stop()
+
+class GameInfoWidget(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.current_game: Optional[Game] = None
+        self.media_manager = MediaManager()
+        self.setup_ui()
+
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #1a1a2e, stop:0.5 #16213e, stop:1 #0f3460);
+            }
+        """)
+
+        content_widget = QWidget()
+        content_layout = QVBoxLayout(content_widget)
+        content_layout.setSpacing(0)
+        content_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.create_header_section(content_layout)
+        self.create_media_section(content_layout)
+        self.create_info_section(content_layout)
+
+        back_button_layout = QHBoxLayout()
+        back_button_layout.setContentsMargins(30, 20, 30, 30)
+        
+        self.back_btn = QPushButton("← Назад к играм")
+        self.back_btn.setFixedHeight(45)
+        self.back_btn.setStyleSheet("""
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #ff6b6b, stop:1 #ff8e8e);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #ff8e8e, stop:1 #ffaaaa);
+            }
+        """)
+        back_button_layout.addWidget(self.back_btn)
+        content_layout.addLayout(back_button_layout)
+
+        scroll_area.setWidget(content_widget)
+        layout.addWidget(scroll_area)
+
+    def create_header_section(self, parent_layout):
+        self.header_frame = QFrame()
+        self.header_frame.setStyleSheet("""
+            QFrame {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 rgba(255, 107, 107, 0.3), stop:1 rgba(15, 52, 96, 0.3));
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+        """)
+        self.header_frame.setFixedHeight(200)
+
+        header_layout = QHBoxLayout(self.header_frame)
+        header_layout.setContentsMargins(30, 20, 30, 20)
+        header_layout.setSpacing(25)
+
+        self.avatar_label = QLabel()
+        self.avatar_label.setFixedSize(160, 160)
+        self.avatar_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.avatar_label.setStyleSheet("""
+            QLabel {
+                background: rgba(0, 0, 0, 0.3);
+                border: 3px solid rgba(255, 255, 255, 0.2);
+                border-radius: 20px;
+            }
+        """)
+        self.avatar_label.setText("🎮")
+
+        info_layout = QVBoxLayout()
+        info_layout.setSpacing(10)
+
+        title_layout = QHBoxLayout()
+        
+        self.title_label = QLabel()
+        self.title_label.setStyleSheet("""
+            QLabel {
+                color: white;
+                font-size: 28px;
+                font-weight: bold;
+            }
+        """)
+        
+        self.rating_label = QLabel()
+        self.rating_label.setStyleSheet("""
+            QLabel {
+                color: #ffd700;
+                font-size: 20px;
+                font-weight: bold;
+                background: rgba(0, 0, 0, 0.3);
+                padding: 5px 10px;
+                border-radius: 10px;
+            }
+        """)
+        
+        title_layout.addWidget(self.title_label)
+        title_layout.addStretch()
+        title_layout.addWidget(self.rating_label)
+
+        details_layout = QHBoxLayout()
+        
+        self.genre_label = QLabel()
+        self.genre_label.setStyleSheet("""
+            QLabel {
+                color: #cccccc;
+                font-size: 16px;
+                font-weight: bold;
+            }
+        """)
+        
+        self.size_label = QLabel()
+        self.size_label.setStyleSheet("""
+            QLabel {
+                color: #cccccc;
+                font-size: 16px;
+                font-weight: bold;
+            }
+        """)
+        
+        details_layout.addWidget(self.genre_label)
+        details_layout.addSpacing(20)
+        details_layout.addWidget(self.size_label)
+        details_layout.addStretch()
+
+        self.description_label = QLabel()
+        self.description_label.setStyleSheet("""
+            QLabel {
+                color: #aaaaaa;
+                font-size: 14px;
+                background: rgba(0, 0, 0, 0.2);
+                padding: 10px;
+                border-radius: 8px;
+            }
+        """)
+        self.description_label.setWordWrap(True)
+        self.description_label.setFixedHeight(60)
+
+        info_layout.addLayout(title_layout)
+        info_layout.addLayout(details_layout)
+        info_layout.addWidget(self.description_label)
+        info_layout.addStretch()
+
+        header_layout.addWidget(self.avatar_label)
+        header_layout.addLayout(info_layout)
+
+        parent_layout.addWidget(self.header_frame)
+
+    def create_media_section(self, parent_layout):
+        self.media_section = QFrame()
+        self.media_section.setStyleSheet("""
+            QFrame {
+                background: transparent;
+            }
+        """)
+        
+        media_layout = QVBoxLayout(self.media_section)
+        media_layout.setContentsMargins(30, 20, 30, 20)
+        media_layout.setSpacing(15)
+        
+        self.media_gallery = MediaGallery()
+        media_layout.addWidget(self.media_gallery)
+        
+        parent_layout.addWidget(self.media_section)
+
+    def create_info_section(self, parent_layout):
+        self.info_frame = QFrame()
+        self.info_frame.setStyleSheet("""
+            QFrame {
+                background: transparent;
+            }
+        """)
+
+        info_layout = QHBoxLayout(self.info_frame)
+        info_layout.setContentsMargins(30, 20, 30, 30)
+        info_layout.setSpacing(30)
+
+        self.min_req_frame = self.create_requirements_frame("⚡ Минимальные требования")
+        self.rec_req_frame = self.create_requirements_frame("🎯 Рекомендуемые требования")
+
+        info_layout.addWidget(self.min_req_frame)
+        info_layout.addWidget(self.rec_req_frame)
+
+        parent_layout.addWidget(self.info_frame)
+
+    def create_requirements_frame(self, title: str) -> QFrame:
+        frame = QFrame()
+        frame.setStyleSheet("""
+            QFrame {
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 15px;
+            }
+        """)
+        frame.setFixedWidth(400)
+
+        layout = QVBoxLayout(frame)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+
+        title_label = QLabel(title)
+        title_label.setStyleSheet("""
+            QLabel {
+                color: #ff6b6b;
+                font-size: 16px;
+                font-weight: bold;
+                background: none;
+            }
+        """)
+        layout.addWidget(title_label)
+
+        requirements_layout = QVBoxLayout()
+        layout.addLayout(requirements_layout)
+        layout.addStretch()
+        return frame
+
+    def update_requirements_frame(self, frame, requirements: list):
+        requirements_layout = frame.layout().itemAt(1)
+        
+        for i in reversed(range(requirements_layout.count())):
+            item = requirements_layout.itemAt(i)
+            if item.widget():
+                item.widget().deleteLater()
+            elif item.layout():
+                for j in reversed(range(item.layout().count())):
+                    widget = item.layout().itemAt(j).widget()
+                    if widget:
+                        widget.deleteLater()
+                item.layout().deleteLater()
+
+        for icon, text in requirements:
+            req_layout = QHBoxLayout()
+            
+            icon_label = QLabel(icon)
+            icon_label.setStyleSheet("""
+                QLabel {
+                    color: #cccccc;
+                    font-size: 14px;
+                    background: none;
+                }
+            """)
+            icon_label.setFixedWidth(120)
+            
+            text_label = QLabel(text)
+            text_label.setStyleSheet("""
+                QLabel {
+                    color: white;
+                    font-size: 14px;
+                    background: none;
+                }
+            """)
+            text_label.setWordWrap(True)
+            
+            req_layout.addWidget(icon_label)
+            req_layout.addWidget(text_label)
+            requirements_layout.addLayout(req_layout)
+
+    def show_game_info(self, game: Game):
+        self.current_game = game
+        
+        self.title_label.setText(game.title)
+        self.rating_label.setText(f"⭐ {game.rating}")
+        self.genre_label.setText(f"🎯 {game.genre}")
+        self.size_label.setText(f"📦 {game.file_size}")
+        self.description_label.setText(game.description)
+        
+        self.media_manager.load_avatar(game, self.avatar_label)
+        self.media_gallery.load_media(game)
+        
+        min_requirements = [
+            ("💻 ОС:", game.min_os),
+            ("🚀 Процессор:", game.min_processor),
+            ("🧠 Память:", game.min_memory),
+            ("🎮 Видеокарта:", game.min_graphics),
+            ("💾 Место на диске:", game.min_storage)
+        ]
+        
+        rec_requirements = [
+            ("💻 ОС:", game.rec_os),
+            ("🚀 Процессор:", game.rec_processor),
+            ("🧠 Память:", game.rec_memory),
+            ("🎮 Видеокарта:", game.rec_graphics),
+            ("💾 Место на диске:", game.rec_storage)
+        ]
+        
+        self.update_requirements_frame(self.min_req_frame, min_requirements)
+        self.update_requirements_frame(self.rec_req_frame, rec_requirements)
+        
+        self.show()
+    
+    def stop_video(self):
+        self.media_gallery.stop_video()
+
+class LoadingWorker(QThread):
+    progress_updated = pyqtSignal(int)
+    status_updated = pyqtSignal(str)
+    finished = pyqtSignal()
+
+    def __init__(self):
+        super().__init__()
+        self._is_running = True
+
+    def run(self):
+        try:
+            steps = [
+                (0, "Инициализация ядра системы..."),
+                (15, "Загрузка графического движка..."),
+                (30, "Подготовка интерфейса..."),
+                (45, "Загрузка игровой библиотеки..."),
+                (60, "Оптимизация производительности..."),
+                (75, "Проверка обновлений..."),
+                (85, "Финальная настройка..."),
+                (95, "Завершение инициализации...")
+            ]
+            
+            for progress, status in steps:
+                if not self._is_running:
+                    return
+                
+                self.progress_updated.emit(progress)
+                self.status_updated.emit(status)
+                self.msleep(150)
+            
+            self.progress_updated.emit(100)
+            self.status_updated.emit("Готово к работе!")
+            self.finished.emit()
+            
+        except Exception as e:
+            print(f"Ошибка в потоке загрузки: {e}")
+            self.status_updated.emit("Ошибка загрузки")
+
+    def stop_loading(self):
+        self._is_running = False
+
+class LoadingScreen(QWidget):
+    loading_complete = pyqtSignal()
+    
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Game Nexus Pro - Загрузка")
+        self.setFixedSize(600, 400)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        
+        self.setup_ui()
+        self.loading_worker = None
+
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.setSpacing(30)
+        layout.setContentsMargins(50, 50, 50, 50)
+
+        background_frame = GlassFrame()
+        background_frame.setFixedSize(500, 300)
+
+        frame_layout = QVBoxLayout(background_frame)
+        frame_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        frame_layout.setSpacing(25)
+        frame_layout.setContentsMargins(40, 40, 40, 40)
+
+        title_label = QLabel("🎮 GAME NEXUS PRO")
+        title_label.setStyleSheet("""
+            QLabel {
+                color: white;
+                font-size: 28px;
+                font-weight: bold;
+                background: none;
+            }
+        """)
+        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        subtitle_label = QLabel("Ultimate Gaming Platform")
+        subtitle_label.setStyleSheet("""
+            QLabel {
+                color: rgba(107, 142, 255, 0.8);
+                font-size: 16px;
+                font-weight: bold;
+                background: none;
+            }
+        """)
+        subtitle_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setFixedHeight(12)
+        self.progress_bar.setTextVisible(False)
+        self.progress_bar.setStyleSheet("""
+            QProgressBar {
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 6px;
+                padding: 1px;
+            }
+            QProgressBar::chunk {
+                background: qlineargradient(
+                    x1:0, y1:0, x1:1, y1:0,
+                    stop:0 rgba(107, 142, 255, 0.8), stop:0.5 rgba(139, 92, 246, 0.7), stop:1 rgba(107, 142, 255, 0.8)
+                );
+                border-radius: 5px;
+            }
+        """)
+
+        self.status_label = QLabel("Инициализация системы...")
+        self.status_label.setStyleSheet("""
+            QLabel {
+                color: #cccccc;
+                font-size: 12px;
+                background: none;
+            }
+        """)
+        self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        frame_layout.addWidget(title_label)
+        frame_layout.addWidget(subtitle_label)
+        frame_layout.addStretch(1)
+        frame_layout.addWidget(self.progress_bar)
+        frame_layout.addWidget(self.status_label)
+
+        layout.addWidget(background_frame)
+
+        self.opacity_effect = QGraphicsOpacityEffect(self)
+        self.setGraphicsEffect(self.opacity_effect)
+        self.opacity_animation = QPropertyAnimation(self.opacity_effect, b"opacity")
+        self.opacity_animation.setDuration(800)
+        self.opacity_animation.setStartValue(0.0)
+        self.opacity_animation.setEndValue(1.0)
+        self.opacity_animation.setEasingCurve(QEasingCurve.Type.OutCubic)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.opacity_animation.start()
+
+    def start_loading(self):
+        self.loading_worker = LoadingWorker()
+        self.loading_worker.progress_updated.connect(self.progress_bar.setValue)
+        self.loading_worker.status_updated.connect(self.status_label.setText)
+        self.loading_worker.finished.connect(self.on_loading_finished)
+        self.loading_worker.start()
+
+    def on_loading_finished(self):
+        self.opacity_animation.setDirection(QPropertyAnimation.Direction.Backward)
+        self.opacity_animation.finished.connect(self.loading_complete.emit)
+        self.opacity_animation.start()
+
+class GlassGameCard(GlassFrame):
+    """Стеклянная карточка игры"""
+    
+    def __init__(self, game: Game, theme_manager: ThemeManager, media_manager: MediaManager):
+        super().__init__()
+        self.game = game
+        self.theme_manager = theme_manager
+        self.media_manager = media_manager
+        
+        # Устанавливаем фиксированный размер и политику
+        self.setFixedSize(300, 450)
+        self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        
+        self.setup_ui()
+        self.setup_animations()
+        self.apply_theme()
+
+    def setup_ui(self):
+        self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(12)
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        
+        # Аватарка
+        self.avatar_label = QLabel()
+        self.avatar_label.setFixedSize(120, 120)
+        self.avatar_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.avatar_label.setStyleSheet("""
+            QLabel {
+                background: rgba(0, 0, 0, 0.3);
+                border: 3px solid rgba(255, 255, 255, 0.2);
+                border-radius: 60px;
+                font-size: 40px;
+            }
+        """)
+        layout.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignCenter)
+        
+        # Загружаем аватарку
+        self.media_manager.load_avatar(self.game, self.avatar_label)
+        
+        # Название игры
+        title_label = QLabel(self.game.title)
+        title_label.setStyleSheet("""
+            QLabel {
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                background: none;
+            }
+        """)
+        title_label.setWordWrap(True)
+        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        title_label.setFixedHeight(40)
+        layout.addWidget(title_label)
+        
+        # Рейтинг
+        rating_label = QLabel(f"⭐ {self.game.rating}")
+        rating_label.setStyleSheet("""
+            QLabel {
+                color: #ffd700;
+                font-size: 14px;
+                font-weight: bold;
+                background: none;
+            }
+        """)
+        rating_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(rating_label)
+        
+        # Жанр
+        genre_label = QLabel(f"🎯 {self.game.genre}")
+        genre_label.setStyleSheet("""
+            QLabel {
+                color: #cccccc;
+                font-size: 12px;
+                background: none;
+            }
+        """)
+        genre_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(genre_label)
+        
+        # Размер
+        size_label = QLabel(f"📦 {self.game.file_size}")
+        size_label.setStyleSheet("""
+            QLabel {
+                color: #cccccc;
+                font-size: 12px;
+                background: none;
+            }
+        """)
+        size_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(size_label)
+        
+        # Растягивающийся спейсер
+        layout.addStretch()
+
+    def setup_animations(self):
+        """Настройка анимаций без влияния на позиционирование"""
+        self.opacity_effect = QGraphicsOpacityEffect(self)
+        self.setGraphicsEffect(self.opacity_effect)
+        
+        self.hover_animation = QPropertyAnimation(self.opacity_effect, b"opacity")
+        self.hover_animation.setDuration(200)
+        self.hover_animation.setEasingCurve(QEasingCurve.Type.OutCubic)
+
+    def apply_theme(self):
+        """Применяет текущую тему к карточке"""
+        theme = self.theme_manager.get_theme()
+        self.set_glass_style(
+            theme.get('glass_color', QColor(255, 255, 255, 30)),
+            theme.get('glass_border', QColor(255, 255, 255, 80))
+        )
+
+    def enterEvent(self, event):
+        """Анимация при наведении - только визуальная"""
+        self.hover_animation.setDirection(QPropertyAnimation.Direction.Forward)
+        if self.hover_animation.state() != QPropertyAnimation.State.Running:
+            self.hover_animation.setStartValue(0.8)
+            self.hover_animation.setEndValue(1.0)
+            self.hover_animation.start()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        """Анимация при уходе курсора - только визуальная"""
+        self.hover_animation.setDirection(QPropertyAnimation.Direction.Backward)
+        if self.hover_animation.state() != QPropertyAnimation.State.Running:
+            self.hover_animation.start()
+        super().leaveEvent(event)
+
+class GlassStoreGameCard(GlassGameCard):
+    """Стеклянная карточка игры в магазине"""
+    
+    def __init__(self, game: Game, theme_manager: ThemeManager, media_manager: MediaManager):
+        super().__init__(game, theme_manager, media_manager)
+        self.add_buttons()
+
+    def add_buttons(self):
+        # Создаем кнопки
+        self.info_btn = GlassButton("ℹ️ Подробнее")
+        self.info_btn.setFixedHeight(35)
+        
+        self.add_btn = GlassButton("📥 Добавить")
+        self.add_btn.setFixedHeight(35)
+        
+        self.download_btn = GlassButton("⚡ Установить")
+        self.download_btn.setFixedHeight(35)
+        
+        # Добавляем кнопки в layout
+        layout = self.layout()
+        
+        button_layout = QVBoxLayout()
+        button_layout.setSpacing(8)
+        
+        top_button_layout = QHBoxLayout()
+        top_button_layout.addWidget(self.info_btn)
+        top_button_layout.addWidget(self.add_btn)
+        
+        button_layout.addLayout(top_button_layout)
+        button_layout.addWidget(self.download_btn)
+        
+        layout.addLayout(button_layout)
+        
+        self.apply_theme_to_buttons()
+
+    def apply_theme_to_buttons(self):
+        """Применяет тему к кнопкам"""
+        theme = self.theme_manager.get_theme()
+        text_color = QColor(255, 255, 255)
+        
+        self.info_btn.set_glass_style(
+            theme.get('button_normal', QColor(255, 255, 255, 80)),
+            theme.get('button_hover', QColor(255, 255, 255, 120)),
+            theme.get('button_pressed', QColor(255, 255, 255, 100)),
+            theme.get('button_border', QColor(255, 255, 255, 120)),
+            text_color
+        )
+        
+        self.add_btn.set_glass_style(
+            theme.get('button_normal', QColor(255, 255, 255, 80)),
+            theme.get('button_hover', QColor(255, 255, 255, 120)),
+            theme.get('button_pressed', QColor(255, 255, 255, 100)),
+            theme.get('button_border', QColor(255, 255, 255, 120)),
+            text_color
+        )
+        
+        self.download_btn.set_glass_style(
+            theme.get('button_normal', QColor(255, 255, 255, 80)),
+            theme.get('button_hover', QColor(255, 255, 255, 120)),
+            theme.get('button_pressed', QColor(255, 255, 255, 100)),
+            theme.get('button_border', QColor(255, 255, 255, 120)),
+            text_color
+        )
+
+class GlassLibraryGameCard(GlassGameCard):
+    """Стеклянная карточка игры в библиотеке"""
+    
+    def __init__(self, game: Game, theme_manager: ThemeManager, media_manager: MediaManager):
+        super().__init__(game, theme_manager, media_manager)
+        self.add_buttons()
+
+    def add_buttons(self):
+        # Создаем кнопки
+        self.info_btn = GlassButton("ℹ️ Подробнее")
+        self.info_btn.setFixedHeight(35)
+        
+        if self.game.is_installed:
+            self.action_btn = GlassButton("🎮 Играть")
+        else:
+            self.action_btn = GlassButton("⚡ Установить")
+        
+        self.action_btn.setFixedHeight(35)
+        
+        self.remove_btn = GlassButton("🗑️ Удалить")
+        self.remove_btn.setFixedHeight(35)
+        
+        # Добавляем кнопки в layout
+        layout = self.layout()
+        button_layout = QHBoxLayout()
+        button_layout.setSpacing(8)
+        button_layout.addWidget(self.info_btn)
+        button_layout.addWidget(self.action_btn)
+        button_layout.addWidget(self.remove_btn)
+        
+        layout.addLayout(button_layout)
+        
+        self.apply_theme_to_buttons()
+
+    def apply_theme_to_buttons(self):
+        """Применяет тему к кнопкам"""
+        theme = self.theme_manager.get_theme()
+        text_color = QColor(255, 255, 255)
+        
+        self.info_btn.set_glass_style(
+            theme.get('button_normal', QColor(255, 255, 255, 80)),
+            theme.get('button_hover', QColor(255, 255, 255, 120)),
+            theme.get('button_pressed', QColor(255, 255, 255, 100)),
+            theme.get('button_border', QColor(255, 255, 255, 120)),
+            text_color
+        )
+        
+        self.action_btn.set_glass_style(
+            theme.get('button_normal', QColor(255, 255, 255, 80)),
+            theme.get('button_hover', QColor(255, 255, 255, 120)),
+            theme.get('button_pressed', QColor(255, 255, 255, 100)),
+            theme.get('button_border', QColor(255, 255, 255, 120)),
+            text_color
+        )
+        
+        self.remove_btn.set_glass_style(
+            QColor(255, 0, 0, 60),
+            QColor(255, 0, 0, 100),
+            QColor(255, 0, 0, 80),
+            QColor(255, 0, 0, 120),
+            text_color
+        )
+
+class UpdateDialog(QDialog):
+    """Диалоговое окно процесса обновления"""
+    
+    def __init__(self, update_manager, parent=None):
+        super().__init__(parent)
+        self.update_manager = update_manager
+        self.setup_ui()
+        self.setWindowTitle("Обновление лаунчера")
+        self.setFixedSize(400, 250)
+        self.setModal(True)
+        
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(20)
+        layout.setContentsMargins(30, 30, 30, 30)
+        
+        # Заголовок
+        title_label = QLabel("🔄 Обновление лаунчера")
+        title_label.setStyleSheet("""
+            QLabel {
+                color: white;
+                font-size: 18px;
+                font-weight: bold;
+                background: none;
+            }
+        """)
+        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(title_label)
+        
+        # Информация о версиях
+        version_info = QLabel(
+            f"Текущая версия: {self.update_manager.current_version}\n"
+            f"Новая версия: {self.update_manager.latest_version}"
+        )
+        version_info.setStyleSheet("color: #cccccc; font-size: 14px;")
+        version_info.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(version_info)
+        
+        # Прогресс бар
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setRange(0, 100)
+        self.progress_bar.setValue(0)
+        self.progress_bar.setStyleSheet("""
+            QProgressBar {
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 10px;
+                color: white;
+                text-align: center;
+                height: 20px;
+            }
+            QProgressBar::chunk {
+                background: qlineargradient(x1:0, y1:0, x1:1, y1:0, 
+                    stop:0 rgba(255, 215, 0, 0.8), stop:1 rgba(255, 165, 0, 0.8));
+                border-radius: 8px;
+            }
+        """)
+        layout.addWidget(self.progress_bar)
+        
+        # Статус
+        self.status_label = QLabel("Подготовка к обновлению...")
+        self.status_label.setStyleSheet("color: #cccccc; font-size: 12px;")
+        self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.status_label)
+        
+        # Кнопка отмены
+        self.cancel_btn = QPushButton("Отмена")
+        self.cancel_btn.setFixedHeight(35)
+        self.cancel_btn.setStyleSheet("""
+            QPushButton {
+                background: rgba(255, 0, 0, 0.6);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background: rgba(255, 0, 0, 0.8);
+            }
+        """)
+        self.cancel_btn.clicked.connect(self.reject)
+        layout.addWidget(self.cancel_btn)
+        
+        # Запускаем процесс обновления
+        QTimer.singleShot(1000, self.start_update_process)
+        
+    def start_update_process(self):
+        """Запускает процесс обновления"""
+        try:
+            # Имитация процесса обновления
+            steps = [
+                (10, "Загрузка информации об обновлении..."),
+                (25, "Скачивание новых файлов..."),
+                (50, "Проверка целостности файлов..."),
+                (75, "Установка обновления..."),
+                (90, "Финальная настройка..."),
+                (100, "Обновление завершено!")
+            ]
+            
+            for progress, status in steps:
+                if not self.isVisible():
+                    return
+                
+                self.progress_bar.setValue(progress)
+                self.status_label.setText(status)
+                
+                # Имитация задержки
+                QApplication.processEvents()
+                time.sleep(1)
+            
+            # Обновление завершено
+            QTimer.singleShot(1000, self.update_complete)
+            
+        except Exception as e:
+            self.status_label.setText(f"Ошибка: {str(e)}")
+            self.cancel_btn.setText("Закрыть")
+            
+    def update_complete(self):
+        """Завершение обновления"""
+        QMessageBox.information(self, "Обновление завершено", 
+                              "Лаунчер успешно обновлен!\n\n"
+                              "Приложение будет перезапущено для применения изменений.")
+        self.accept()
+
+class GameLauncher(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.settings_manager = SettingsManager()
+        self.theme_manager = ThemeManager(self.settings_manager)
+        self.media_manager = MediaManager()
+        self.update_manager = UpdateManager(self.settings_manager)
+        
+        self.load_games()
+        self.setup_ui()
+        self.load_settings()
+        
+        # Проверяем обновления после загрузки
+        QTimer.singleShot(2000, self.check_updates)
+
+    def check_updates(self):
+        """Проверяет наличие обновлений и показывает кнопку если нужно"""
+        try:
+            if self.update_manager.check_for_updates():
+                self.show_update_button()
+                print(f"Доступно обновление! Текущая версия: {self.update_manager.current_version}, Новая версия: {self.update_manager.latest_version}")
+            else:
+                # Скрываем кнопку если обновлений нет
+                self.hide_update_button()
+        except Exception as e:
+            print(f"Ошибка при проверке обновлений: {e}")
+            self.hide_update_button()
+
+    def show_update_button(self):
+        """Показывает золотую кнопку обновления"""
+        try:
+            # Создаем золотую кнопку обновления если её нет
+            if not hasattr(self, 'update_btn') or self.update_btn is None:
+                self.update_btn = UpdateButton("🔄 ОБНОВИТЬ ДО v" + self.update_manager.latest_version)
+                self.update_btn.setFixedHeight(45)
+                self.update_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+                self.update_btn.clicked.connect(self.perform_update)
+                
+                # Добавляем кнопку в сайдбар
+                sidebar_layout = self.sidebar.layout()
+                sidebar_layout.insertWidget(1, self.update_btn)  # Добавляем после логотипа
+            
+            # Устанавливаем кнопку в менеджере обновлений
+            self.update_manager.set_update_button(self.update_btn)
+            
+            # Показываем кнопку
+            self.update_btn.show()
+            
+            # Показываем уведомление только при первом обнаружении обновления
+            if not self.settings_manager.get_setting("update_notified", False):
+                QMessageBox.information(self, "Доступно обновление", 
+                                      f"Доступна новая версия {self.update_manager.latest_version}!\n\n"
+                                      f"Текущая версия: {self.update_manager.current_version}\n"
+                                      f"Нажмите кнопку 'ОБНОВИТЬ' для загрузки обновления.")
+                self.settings_manager.set_setting("update_notified", True)
+                                  
+        except Exception as e:
+            print(f"Ошибка при создании кнопки обновления: {e}")
+
+    def hide_update_button(self):
+        """Скрывает кнопку обновления"""
+        try:
+            if hasattr(self, 'update_btn') and self.update_btn:
+                self.update_btn.hide()
+        except Exception as e:
+            print(f"Ошибка при скрытии кнопки обновления: {e}")
+
+    def perform_update(self):
+        """Выполняет процесс обновления"""
+        try:
+            reply = QMessageBox.question(self, "Обновление лаунчера",
+                                       f"Обновить лаунчер до версии {self.update_manager.latest_version}?\n\n"
+                                       "Текущая версия будет заменена. Процесс займет несколько минут.",
+                                       QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            
+            if reply == QMessageBox.StandardButton.Yes:
+                # Показываем диалог обновления
+                update_dialog = UpdateDialog(self.update_manager, self)
+                if update_dialog.exec() == QDialog.DialogCode.Accepted:
+                    # Обновление успешно завершено
+                    self.on_update_complete()
+                    
+        except Exception as e:
+            print(f"Ошибка при выполнении обновления: {e}")
+            QMessageBox.critical(self, "Ошибка обновления", 
+                              f"Не удалось выполнить обновление: {str(e)}")
+
+    def on_update_complete(self):
+        """Вызывается после успешного обновления"""
+        try:
+            # Обновляем текущую версию
+            self.update_manager.current_version = self.update_manager.latest_version
+            self.update_manager.update_available = False
+            
+            # Скрываем кнопку обновления
+            self.hide_update_button()
+            
+            # Сбрасываем флаг уведомления
+            self.settings_manager.set_setting("update_notified", False)
+            
+            # Сохраняем новую версию в настройках
+            self.settings_manager.set_setting("app_version", self.update_manager.current_version)
+            
+            print(f"Лаунчер успешно обновлен до версии {self.update_manager.current_version}")
+            
+        except Exception as e:
+            print(f"Ошибка при завершении обновления: {e}")
+
+    def apply_theme_immediately(self):
+        """Немедленное применение темы для предотвращения белого экрана"""
+        try:
+            theme = self.theme_manager.get_theme()
+            immediate_stylesheet = f"""
+                QMainWindow, QWidget {{
+                    background: {theme['background']};
+                    color: {theme['text']};
+                }}
+                QLabel {{
+                    background: transparent;
+                    color: {theme['text']};
+                }}
+            """
+            self.setStyleSheet(immediate_stylesheet)
+        except Exception as e:
+            print(f"Ошибка при немедленном применении темы: {e}")
+
+    def load_games(self):
+        print("Загрузка игр...")
+        
+        self.builtin_games = self.load_builtin_games()
+        self.user_games = self.settings_manager.get_user_games()
+        self.library_games = self.settings_manager.get_library_games()
+        self.store_games = self.builtin_games + self.user_games
+        
+        print(f"Загружено {len(self.builtin_games)} встроенных игр, {len(self.user_games)} пользовательских игр, {len(self.library_games)} игр в библиотеке")
+
+    def load_builtin_games(self):
+        builtin_games = [
+            Game(
+                title="Cyberpunk 2077",
+                description="Научно-фантастическая RPG в открытом мире от создателей The Witcher. Погрузитесь в мрачное будущее Найт-Сити.",
+                genre="RPG",
+                rating=4.8,
+                is_installed=False,
+                in_library=False,
+                download_url="https://byrutgame.org/index.php?do=download&id=168145&sid=1",
+                file_size="70 GB",
+                avatar_url="https://i.postimg.cc/Rhjh7Zf6/i_1.png",
+                screenshots=[
+                    "https://i.postimg.cc/zvRjZ0VZ/1665931851-ss-1f1f380757cd18aecd83344329e8ed223b03a427-1920x1080.jpg",
+                    "https://i.postimg.cc/FzcBg9b5/1665931818-ss-ad01aa3d3bf4d141280c79a239af402560a4ab88-1920x1080.jpg",
+                ],
+                video_urls=[
+                    "https://youtu.be/aSrFWinrkeQ",
+                    "https://youtu.be/zBrkG3aeWCc",
+                ],
+                executable_path="",
+                min_os="Windows 10",
+                min_processor="Intel Core i5-3570K",
+                min_memory="8 GB RAM",
+                min_graphics="NVIDIA GeForce GTX 780",
+                min_storage="70 GB",
+                rec_os="Windows 10",
+                rec_processor="Intel Core i7-4790",
+                rec_memory="12 GB RAM",
+                rec_graphics="NVIDIA GeForce GTX 1060",
+                rec_storage="70 GB"
+            ),
+            Game(
+                title="The Witcher 3: Wild Hunt",
+                description="Эпическая RPG о ведьмаке Геральте из Ривии. Отправляйтесь в опасное путешествие по огромному фэнтезийному миру.",
+                genre="RPG",
+                rating=4.9,
+                is_installed=False,
+                in_library=False,
+                download_url="https://itorrents-igruha.net/engine/download.php?id=67805",
+                file_size="50 GB",
+                avatar_url="https://i.postimg.cc/nzmmzyTJ/vedmak-3-dikaja-ohota1.jpg",
+                screenshots=[
+                    "https://i.postimg.cc/44ztTTmt/1scr-049978161.jpg",
+                    "https://i.postimg.cc/tJ5Ynpxd/2scr-961328256.jpg",
+                    "https://i.postimg.cc/rFfD8ycr/3scr-1524166935.jpg",
+                    "https://i.postimg.cc/k5bGFxSy/4scr-136567463.jpg",
+                    "https://i.postimg.cc/s2dszbBS/5scr-9860206820.jpg",
+                    "https://i.postimg.cc/gjJP4W7Q/6scr-221972394.jpg",
+                    "https://i.postimg.cc/yd6qYK73/7scr-5146161148.jpg",
+                    "https://i.postimg.cc/RV6k0Xxc/8scr-802530420.jpg",
+                ],
+                video_urls=[
+                    "https://youtu.be/nBT2SP21f3Q",
+                ],
+                executable_path="",
+                min_os="Windows 7/8/10",
+                min_processor="Intel CPU Core i5-2500K",
+                min_memory="6 GB RAM",
+                min_graphics="NVIDIA GPU GeForce GTX 660",
+                min_storage="50 GB",
+                rec_os="Windows 7/8/10",
+                rec_processor="Intel CPU Core i7-3770",
+                rec_memory="8 GB RAM",
+                rec_graphics="NVIDIA GPU GeForce GTX 770",
+                rec_storage="50 GB"
+            ),
+            Game(
+                title="Just Cause 4",
+                description="Погрузитесь в эпический хаос Just Cause 4 — где вы станете агентом разрушения Рико Родригесом, прибывшим в бушующий стихиями мир Солиса, чтобы с помощью легендарного крюка, реактивного ранца и арсенала экзотического оружия устроить самую зрелищную революцию против армии «Чёрной руки».",
+                genre="Экшен",
+                rating=4.7,
+                is_installed=False,
+                in_library=False,
+                download_url="https://itorrents-igruha.net/engine/download.php?id=25499",
+                file_size="50 GB",
+                avatar_url="https://i.postimg.cc/HkTFtH7M/1688408703-cover.jpg",
+                screenshots=[
+                    "https://i.postimg.cc/nchvKPhh/1543870542-ss-9e6fe9056d9f63c98fd9e0312f44a20df91dfd23-1920x1080.jpg",
+                    "https://i.postimg.cc/6q5G08tW/1543870474-ss-124ea40c48eb302ce3db68ff5848e49ac45b2b44-1920x1080.jpg",
+                    "https://i.postimg.cc/cJRgGRJr/1543870473-ss-231b6a4c504ad55d58304a0763424d8e7963bdeb-1920x1080.jpg",
+                    "https://i.postimg.cc/MHFXmt95/1543870554-ss-842fde8bf272830359f3ded399313a6f60343692-1920x1080.jpg",
+                    "https://i.postimg.cc/gJcJ915X/1543870511-ss-e0780d3528be2fd01bb393d8515e151b7e49eb42-1920x1080.jpg",
+                    "https://i.postimg.cc/0ygy5zF5/1543870480-ss-fb5bb5336ad9930660f312a1121a01fe10751cdd-1920x1080.jpg",
+                    "https://i.postimg.cc/C16w35bT/1543870605-ss-51ce5f63a292528bc8c2285d473cc2fb9741859a-1920x1080.jpg",
+                    "https://i.postimg.cc/TYbTsR1M/1543870606-ss-c5f5d74cc8eb64bf182e79758875ad250e7d2c2f-1920x1080.jpg",
+                ],
+                video_urls=[
+                    "https://youtu.be/sRPJa94rTpU",
+                ],
+                executable_path="",
+                min_os="Windows 7/8/10",
+                min_processor="Intel Core i5-2500K",
+                min_memory="6 GB RAM",
+                min_graphics="NVIDIA GeForce GTX 660 (2 ГБ)",
+                min_storage="50 GB",
+                rec_os="Windows 7/8/10",
+                rec_processor="Intel Core i7-3770",
+                rec_memory="8 GB RAM",
+                rec_graphics="NVIDIA GeForce GTX 770 (2 ГБ)",
+                rec_storage="50 GB"
+            ),
+            Game(
+                title="Dying Light 2 Stay Human",
+                description="игра в жанре экшн-ролевой игры с элементами хоррора.",
+                genre="Экшены, Приключенческие, Ролевые игры",
+                rating=4.9,
+                is_installed=False,
+                in_library=False,
+                download_url="https://itorrents-igruha.net/engine/download.php?id=91768",
+                file_size="41.47 GB",
+                avatar_url="https://i.postimg.cc/qRVcckzH/1708611241-library-600x900-2x-1.jpg",
+                screenshots=[
+                    "https://i.postimg.cc/HnGpshZv/1708612633-ss-1c3c5764cc6d6a9a86122a0de643973c0c8dca1b-1.jpg",
+                    "https://i.postimg.cc/wB7H5pnw/1708612681-ss-9ba79964c3878648a1469d263df7fb17fc3d521c-1.jpg",
+                    "https://i.postimg.cc/NfDwWFcb/1708612682-ss-64ba1a8bd42d3d0a34bc894d6faa0e57a1328aef-1.jpg",
+                    "https://i.postimg.cc/C54WTPWZ/1708612698-ss-84ca00f3d3b48e0a1fa6b96b17f02a65f1447950-1.jpg",
+                    "https://i.postimg.cc/25BM88s3/1708612635-ss-28860dda506d28aea744a08744bad8afb1b506c5-1.jpg",
+                    "https://i.postimg.cc/WbWHGkjc/1708612689-ss-d7906b3946d4857d28c159e7a1555a003a4426f8-1.jpg",
+                    "https://i.postimg.cc/xjgxQzXG/1708612676-ss-df6aeb006060f7b26439f4bc7bee8b9e96c80e02-1.jpg",
+                    "https://i.postimg.cc/2y5xy01V/1708612683-ss-fe9a52a60f4739a44cbd8b0c0856033ea6996624-1.jpg",
+                ],
+                video_urls=[
+                    "https://youtu.be/kH41ESKMiuY",
+                ],
+                executable_path="",
+                min_os="Windows 7/8/10",
+                min_processor="Intel Core i3-9100 - AMD Ryzen 3 2300X",
+                min_memory="8 GB RAM",
+                min_graphics="NVIDIA GeForce GTX 1050 Ti - AMD Radeon RX 560 (4 Гб)",
+                min_storage="41.47 GB",
+                rec_os="Windows 7/8/10",
+                rec_processor="Intel Core i5-8600K - AMD Ryzen 5 3600X",
+                rec_memory="16 GB RAM",
+                rec_graphics="NVIDIA GeForce RTX 2060 (6 Гб) - AMD Radeon RX Vega 56 (8 Гб)",
+                rec_storage="41.47 GB"
+            ),
+            Game(
+                title="Dying Light: The Beast",
+                description="Выживание в постапокалиптическом мире, наполненном зомби.",
+                genre="Экшены, Приключенческие, Ролевые, Хоррор, Выживание",
+                rating=4.6,
+                is_installed=False,
+                in_library=False,
+                download_url="https://itorrents-igruha.net/engine/download.php?id=91978",
+                file_size="41.47 GB",
+                avatar_url="https://i.postimg.cc/cC94BXt2/1734066048-library-600x900-2x.jpg",
+                screenshots=[
+                    "https://i.postimg.cc/j521JcKd/1749883757-ss-18a2fa6569c9c3ef568c87cbd94c43cdb38245b7.jpg",
+                    "https://i.postimg.cc/fymQJCjH/1749883672-ss-684d545596c8614f6a9194ab6de4718b1d54af89.jpg",
+                    "https://i.postimg.cc/02hJgyrV/1749883750-ss-4808c226d6eb8ad0cedca3eecdcb950400540d22.jpg",
+                    "https://i.postimg.cc/SRJj5B4C/1749883724-ss-6646e9be4d29779d2b0bc0e3a4a7b6b40150b208.jpg",
+                    "https://i.postimg.cc/t4hJLdKs/1749883719-ss-8391c35e0bdb345926596a62a72711e82008087d.jpg",
+                    "https://i.postimg.cc/cH5LQF3v/1749883741-ss-ee16f3f205420283135af1ff058069c584d79186.jpg",
+                    "https://i.postimg.cc/02Sywdy1/1749883720-ss-f3a2a4e650e84b4c09fcdc7e8f9583e1fa0bae51.jpg",
+                    "https://i.postimg.cc/NFHBRBY9/1749883695-ss-f38e69c8b6d6ee4eda2016de28eb11ad3632a552.jpg",
+                ],
+                video_urls=[
+                    "https://youtu.be/qsqBCs7o5go",
+                ],
+                executable_path="",
+                min_os="Windows 7/8/10",
+                min_processor="Intel Core i3-9100 - AMD Ryzen 3 2300X",
+                min_memory="8 GB RAM",
+                min_graphics="NVIDIA GeForce GTX 1050 Ti - AMD Radeon RX 560 (4 Гб)",
+                min_storage="41.47 GB",
+                rec_os="Windows 7/8/10",
+                rec_processor="Intel Core i5-8600K - AMD Ryzen 5 3600X",
+                rec_memory="16 GB RAM",
+                rec_graphics="NVIDIA GeForce RTX 2060 (6 Гб) - AMD Radeon RX Vega 56 (8 Гб)",
+                rec_storage="41.47 GB"
+            ),
+            Game(
+                title="Marvel's Spider-Man 2",
+                description=" — игра в жанре экшн-приключения, основанная на персонаже Человека-паука из комиксов Marvel.",
+                genre="Экшены, Приключенческие игры",
+                rating=4.9,
+                is_installed=False,
+                in_library=False,
+                download_url="https://itorrents-igruha.net/engine/download.php?id=91284",
+                file_size="88.08 GB",
+                avatar_url="https://i.postimg.cc/59CxXfVJ/1738265146-library-600x900-2x.jpg",
+                screenshots=[
+                    "https://i.postimg.cc/TwbZ3YW0/1738265228-ss-0fda7c96ee3f16038559fffa8c2cd7b3ac433c2b.jpg",
+                    "https://i.postimg.cc/T3PFWcDL/1738265190-ss-7ef8bc176702470fdc73f62f8e537c3912e70444.jpg",
+                    "https://i.postimg.cc/x8YFjG2h/1738265154-ss-74e612eb0ae275bd6e7f69d407dda8b03d83629f.jpg",
+                    "https://i.postimg.cc/vTQ3wQ7n/1738265228-ss-aa8346cf207a1e114c5f9e7f6c3086c5dc9c3050.jpg",
+                    "https://i.postimg.cc/NjWDf87c/1738265180-ss-b4be948946130b7e140be82f24f1f9ccefae9117.jpg",
+                    "https://i.postimg.cc/fy2j4YT9/1738265161-ss-c6a0adf568d91d49a5c0f7f5e4df7e1cef71ee28.jpg",
+                    "https://i.postimg.cc/zXQS0wc9/1738265163-ss-e4b67059ddedaeebd91fce113745f3eb99736f56.jpg",
+                    "https://i.postimg.cc/bJL1b1bG/1738265203-ss-f4140ba12158b812d9c1adc86c484d8e84b92e92.jpg",
+                ],
+                video_urls=[
+                    "https://youtu.be/ffsIyLvm8dQ",
+                ],
+                executable_path="",
+                min_os="Windows 10/11",
+                min_processor="Intel Core i3-8100 - AMD Ryzen 3 2300X",
+                min_memory="16 GB RAM",
+                min_graphics="NVIDIA GeForce GTX 1650 - AMD Radeon RX 5500 XT",
+                min_storage="88.08 GB",
+                rec_os="Windows 10/11",
+                rec_processor="Intel Core i9-12900K - AMD Ryzen 7 7800X3D",
+                rec_memory="32 GB RAM",
+                rec_graphics="NVIDIA GeForce RTX 4090",
+                rec_storage="88.08 GB"
+            ),
+            Game(
+                title="Forza Horizon 5",
+                description="гоночная игра с открытым миром, действие которой происходит в вымышленной версии Мексики.",
+                genre="Экшены, Приключенческие, Гонки, Симуляторы, Спортивные",
+                rating=4.9,
+                is_installed=False,
+                in_library=False,
+                download_url="https://itorrents-igruha.net/engine/download.php?id=91582",
+                file_size="147.77 GB",
+                avatar_url="https://i.postimg.cc/y6JPMbCQ/1663239689-cover-1.jpg",
+                screenshots=[
+                    "https://i.postimg.cc/Hs6kbBVC/1635973381-screenshot-forza-horizon-5-1920x1080-2021-06-14-5.jpg",
+                    "https://i.postimg.cc/wvYq9rbW/1635973327-screenshot-forza-horizon-5-1920x1080-2021-06-14-6.jpg",
+                    "https://i.postimg.cc/sDgVf7ws/1635973300-screenshot-forza-horizon-5-1920x1080-2021-06-14-7.jpg",
+                    "https://i.postimg.cc/d19YwVCZ/1635973367-screenshot-forza-horizon-5-1920x1080-2021-06-14-8.jpg",
+                    "https://i.postimg.cc/mk6Kgzgf/1635973317-screenshot-forza-horizon-5-1920x1080-2021-06-14-9.jpg",
+                    "https://i.postimg.cc/GpJNsSp3/1635973295-screenshot-forza-horizon-5-3840x2160-2021-08-24-23.jpg",
+                    "https://i.postimg.cc/j2Ckmx45/1635973361-screenshot-forza-horizon-5-3840x2160-2021-08-24-26.jpg",
+                    "https://i.postimg.cc/tCKmvH1f/1635973317-screenshot-forza-horizon-5-3840x2160-2021-08-24-27.jpg",
+                ],
+                video_urls=[
+                    "https://youtu.be/FYH9n37B7Yw",
+                ],
+                executable_path="",
+                min_os="Windows 10",
+                min_processor="Intel i5-4460 - AMD Ryzen 3 1200",
+                min_memory="8 GB RAM",
+                min_graphics="NVIDIA GTX 970 - AMD RX 470 - Intel Arc A380",
+                min_storage="147.77 GB",
+                rec_os="Windows 10",
+                rec_processor="Intel Core i5-8400 - AMD Ryzen 5 1500X",
+                rec_memory="16 GB RAM",
+                rec_graphics="NVIDIA GTX 1070 - AMD RX 590 - Intel Arc A750",
+                rec_storage="147.77 GB"
+            ),
+            Game(
+                title="Forza Horizon 4 Ultimate Edition",
+                description="Гоночная игра с открытым миром, действие которой происходит в Великобритании с динамической сменой сезонов.",
+                genre="Экшены, Приключенческие, Гонки, Симуляторы, Спортивные",
+                rating=4.8,
+                is_installed=False,
+                in_library=False,
+                download_url="https://itorrents-igruha.net/engine/download.php?id=58814",
+                file_size="80.5 GB",
+                avatar_url="https://i.postimg.cc/qvJtQw0S/1668462888-cover.jpg",
+                screenshots=[
+                    "https://i.postimg.cc/rp5vm1Rp/1529670907-1efbd5c1-48b0-4177-a315-d36ca736fb8d.jpg",
+                    "https://i.postimg.cc/6pvPjr0c/1529670910-4de11c70-c185-4396-b11b-13b0ec5e9c77.jpg",
+                    "https://i.postimg.cc/D0NC504D/1529670913-42eadba9-7ccb-4184-a645-65c251a55839.jpg",
+                    "https://i.postimg.cc/SK4ggwjy/1529670878-90bbac5c-2198-4ea6-81c6-2ab792f40b49.jpg",
+                    "https://i.postimg.cc/6pJcQDrR/1529670924-5060404d-03b8-4b4d-9ba7-579f35c18f7c.jpg",
+                    "https://i.postimg.cc/bYZ4Sft3/1529670860-dd9f5de5-ce64-49c1-8393-1784ab146a50.jpg",
+                    "https://i.postimg.cc/3wrcKshm/1529670916-edecbd5e-4a92-4811-8a84-0fdc6e4baae3.jpg",
+                    "https://i.postimg.cc/66415LsJ/1529670911-fd2d6947-478f-4544-ae6e-7390474672f4.jpg",
+                ],
+                video_urls=[
+                    "https://youtu.be/BxlMtTh48zw",
+                ],
+                executable_path="",
+                min_os="Windows 10",
+                min_processor="Intel i3-4170 - AMD FX-8300",
+                min_memory="8 GB RAM",
+                min_graphics="NVIDIA GTX 760 - AMD R7 260X",
+                min_storage="80 GB",
+                rec_os="Windows 10",
+                rec_processor="Intel i7-3820 - AMD Ryzen 3 1300X",
+                rec_memory="12 GB RAM",
+                rec_graphics="NVIDIA GTX 1060 - AMD RX 580",
+                rec_storage="100 GB"
+            ),
+            Game(
+                title="Forza Horizon 3",
+                description="Гоночная игра с открытым миром, действие которой происходит в Австралии. Станьте владельцем фестиваля Horizon.",
+                genre="Экшены, Приключенческие, Гонки, Симуляторы, Спортивные",
+                rating=4.7,
+                is_installed=False,
+                in_library=False,
+                download_url="https://itorrents-igruha.net/engine/download.php?id=36726",
+                file_size="55.2 GB",
+                avatar_url="https://i.postimg.cc/3xqvRp5j/1758816863-coverforza.jpg",
+                screenshots=[
+                    "https://i.postimg.cc/v8PHbyd9/1467035231-4cacce3a-33a7-45ea-a9ce-1e2ba96d0e09.jpg",
+                    "https://i.postimg.cc/xdYSLp23/1467035246-06f08033-4a33-47b7-a45d-a8b0e2b9714f.jpg",
+                    "https://i.postimg.cc/65vsgx6w/1467035240-6d6d9c3c-a7a1-40f4-976e-b22c22e4a559.jpg",
+                    "https://i.postimg.cc/PqK0YtKX/1467035234-9d5558b7-2480-4a23-8596-2cd04f403387.jpg",
+                    "https://i.postimg.cc/yx3GM0Kd/1467035288-95c5302d-5a6f-4e9a-aa2f-ec3a5f1715a5.jpg",
+                    "https://i.postimg.cc/ZY9KbgK0/1467035213-50279f7b-ee47-44cf-8d73-006e7ff68fbd.jpg",
+                    "https://i.postimg.cc/wTLqJmNd/1467035300-dda75584-4860-4560-ab05-498cbce6c8d8.jpg",
+                    "https://i.postimg.cc/BvQ4d7wp/1467035281-fdec8f70-36e9-4fe6-b6d2-013daea4971d.jpg",
+                ],
+                video_urls=[
+                    "https://youtu.be/lnIBkf2n5n0",
+                ],
+                executable_path="",
+                min_os="Windows 10",
+                min_processor="Intel i3-4170 - AMD FX-8300",
+                min_memory="8 GB RAM",
+                min_graphics="NVIDIA GTX 650 Ti - AMD R7 250X",
+                min_storage="55 GB",
+                rec_os="Windows 10",
+                rec_processor="Intel i7-3820 - AMD FX-8350",
+                rec_memory="12 GB RAM",
+                rec_graphics="NVIDIA GTX 970 - AMD R9 290X",
+                rec_storage="60 GB"
+            ),
+            Game(
+                title="Call of Duty: Modern Warfare 2",
+                description="Продолжение культового шутера с современным переосмыслением. Динамичный сюжет, улучшенная графика и знаменитый мультиплеер.",
+                genre="Экшены, Шутеры",
+                rating=4.9,
+                is_installed=False,
+                in_library=False,
+                download_url="https://itorrents-igruha.net/engine/download.php?id=88691",
+                file_size="72 GB",
+                avatar_url="https://i.postimg.cc/MTTTTGk4/1664722356-call-of-duty-modern-warfare-2-2022.jpg",
+                screenshots=[
+                    "https://i.postimg.cc/zvRjZ0VZ/1665931851-ss-1f1f380757cd18aecd83344329e8ed223b03a427-1920x1080.jpg",
+                    "https://i.postimg.cc/FzcBg9b5/1665931818-ss-ad01aa3d3bf4d141280c79a239af402560a4ab88-1920x1080.jpg",
+                ],
+                video_urls=[
+                    "https://youtu.be/ztjfwecrY8E",
+                ],
+                executable_path="",
+                min_os="Windows 10 64-Bit",
+                min_processor="Intel Core i3-6100 / AMD Ryzen 3 1200",
+                min_memory="8 GB RAM",
+                min_graphics="NVIDIA GeForce GTX 960 / AMD Radeon RX 470",
+                min_storage="72 GB",
+                rec_os="Windows 10 64-Bit / Windows 11 64-Bit",
+                rec_processor="Intel Core i5-6600 / AMD Ryzen 5 1400",
+                rec_memory="12 GB RAM",
+                rec_graphics="NVIDIA GeForce GTX 1060 / AMD Radeon RX 580",
+                rec_storage="72 GB"
+            ),
+            Game(
+                title="Hollow Knight Silksong",
+                description="Продолжение культовой метроидвании. Играйте за Хорнет и отправляйтесь в новое приключение по королевству Шелка.",
+                genre="Приключенческие, Инди, Экшены, Платформеры, Ролевые",
+                rating=4.9,
+                is_installed=False,
+                in_library=False,
+                download_url="https://itorrents-igruha.net/engine/download.php?id=91767",
+                file_size="8.5 GB",
+                avatar_url="https://i.postimg.cc/1zvqjcFq/1755787377-library-600x900-2x-1.jpg",
+                screenshots=[
+                    "https://i.postimg.cc/k5J10m16/1755787322-ss-0a6eebaf5ade7dbd1dcffcc108d6b5dca68373f3-1.jpg",
+                    "https://i.postimg.cc/3NvnXJRd/1755787294-ss-4c9cc3320086b199da64a4283f45ff41fe873d5e-1.jpg",
+                    "https://i.postimg.cc/pXKsyT3v/1755787303-ss-8a7f8252f9a1f79742ce6e0a006bf5360697be8b-1.jpg",
+                    "https://i.postimg.cc/xCkRQTL6/1755787342-ss-23a4df664aa3f994fa3f282f7cd77169a5eaa188-1.jpg",
+                    "https://i.postimg.cc/MHVmcPPm/1755787291-ss-cfd979d4869e610c6348eaedf1cfeb0d926ac654-1.jpg",
+                    "https://i.postimg.cc/bN0Rp52b/1755787360-ss-fa26119cb53ce2433930f1257f8b76a465f0f7b8-1.jpg",
+                ],
+                video_urls=[
+                    "https://youtu.be/6XGeJwsUP9c",
+                ],
+                executable_path="",
+                min_os="Windows 7/8/10",
+                min_processor="Intel Core 2 Duo E5200 - AMD Athlon 64 X2 5000+",
+                min_memory="4 GB RAM",
+                min_graphics="NVIDIA GeForce 9800 GT - AMD HD 5670",
+                min_storage="10 GB",
+                rec_os="Windows 10",
+                rec_processor="Intel Core i5 - AMD FX-6300",
+                rec_memory="8 GB RAM",
+                rec_graphics="NVIDIA GeForce GTX 560 - AMD Radeon HD 6870",
+                rec_storage="10 GB"
+            ),
+        ]
+        
+        return builtin_games
+
+    def setup_ui(self):
+        self.setWindowTitle('GAME NEXUS PRO • Ultimate Gaming Platform')
+        
+        window_size = self.settings_manager.get_setting("window_size", [1400, 800])
+        window_position = self.settings_manager.get_setting("window_position", [100, 100])
+        
+        self.resize(window_size[0], window_size[1])
+        self.move(window_position[0], window_position[1])
+        
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+
+        main_layout = QHBoxLayout(central_widget)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+
+        self.create_sidebar(main_layout)
+        self.create_content_area(main_layout)
+        
+        self.apply_full_theme()
+
+    def create_sidebar(self, main_layout):
+        """Создает боковую панель навигации"""
+        self.sidebar = GlassFrame()
+        self.sidebar.setFixedWidth(280)
+        sidebar_layout = QVBoxLayout(self.sidebar)
+        sidebar_layout.setContentsMargins(20, 40, 20, 30)
+        sidebar_layout.setSpacing(25)
+
+        # Логотип
+        self.logo_label = QLabel("🎮 GAME NEXUS")
+        self.logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.logo_label.setStyleSheet("""
+            QLabel {
+                color: rgba(107, 142, 255, 0.8);
+                font-size: 24px;
+                font-weight: bold;
+                background: rgba(255, 255, 255, 0.1);
+                padding: 15px;
+                border-radius: 15px;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+        """)
+        sidebar_layout.addWidget(self.logo_label)
+
+        # Кнопки навигации
+        self.create_navigation_buttons(sidebar_layout)
+        sidebar_layout.addStretch()
+
+        # Статистика
+        self.create_stats_section(sidebar_layout)
+
+        main_layout.addWidget(self.sidebar)
+
+    def create_navigation_buttons(self, parent_layout):
+        """Создает кнопки навигации"""
+        nav_buttons = [
+            ("🎮 МОЯ БИБЛИОТЕКА", self.show_library),
+            ("🛒 МАГАЗИН ИГР", self.show_store),
+            ("⚙️ НАСТРОЙКИ", self.show_settings)
+        ]
+
+        self.nav_buttons = []
+        for text, callback in nav_buttons:
+            btn = QPushButton(text)
+            btn.setFixedHeight(50)
+            btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+            btn.clicked.connect(callback)
+            parent_layout.addWidget(btn)
+            self.nav_buttons.append(btn)
+
+    def create_stats_section(self, parent_layout):
+        """Создает секцию статистики"""
+        self.stats_frame = GlassFrame()
+        stats_layout = QVBoxLayout(self.stats_frame)
+        stats_layout.setContentsMargins(15, 15, 15, 15)
+        
+        self.stats_title = QLabel("📊 СТАТИСТИКА")
+        self.stats_title.setStyleSheet("color: rgba(107, 142, 255, 0.8); font-weight: bold; font-size: 14px;")
+        stats_layout.addWidget(self.stats_title)
+        
+        installed_count = len([game for game in self.library_games if game.is_installed])
+        total_games = len(self.store_games) + len(self.library_games)
+        self.stats_text = QLabel(f"• Игр в библиотеке: {len(self.library_games)}\n• Установлено: {installed_count}\n• Всего игр: {total_games}")
+        self.stats_text.setStyleSheet("color: #aaa; font-size: 12px;")
+        stats_layout.addWidget(self.stats_text)
+        
+        parent_layout.addWidget(self.stats_frame)
+
+    def create_content_area(self, main_layout):
+        """Создает основную контентную область"""
+        self.content_stack = QStackedWidget()
+
+        self.library_page = self.create_library_page()
+        self.store_page = self.create_store_page()
+        self.settings_page = self.create_settings_page()
+        
+        # Создаем страницу информации об игре
+        self.game_info_page = GameInfoWidget(self)
+        self.game_info_page.back_btn.clicked.connect(self.show_previous_page)
+
+        self.content_stack.addWidget(self.library_page)
+        self.content_stack.addWidget(self.store_page)
+        self.content_stack.addWidget(self.settings_page)
+        self.content_stack.addWidget(self.game_info_page)
+
+        self.content_stack.currentChanged.connect(self.on_page_changed)
+
+        main_layout.addWidget(self.content_stack)
+
+    def create_library_page(self):
+        """Создает страницу библиотеки"""
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(40, 30, 40, 30)
+        layout.setSpacing(25)
+
+        library_header = QLabel("🎮 МОЯ БИБЛИОТЕКА")
+        library_header.setStyleSheet("""
+            QLabel {
+                color: white;
+                font-size: 28px;
+                font-weight: bold;
+                padding: 10px 0px;
+            }
+        """)
+        layout.addWidget(library_header)
+
+        installed_count = len([game for game in self.library_games if game.is_installed])
+        self.library_stats = QLabel(f"📊 Установлено игр: {installed_count} | Всего игр: {len(self.library_games)}")
+        self.library_stats.setStyleSheet("color: rgba(107, 142, 255, 0.8); font-size: 16px; font-weight: bold;")
+        layout.addWidget(self.library_stats)
+
+        # Создаем контейнер для игр
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setStyleSheet("QScrollArea { border: none; background: transparent; }")
+        
+        self.library_container = QWidget()
+        self.library_layout = QGridLayout(self.library_container)
+        self.library_layout.setSpacing(20)
+        self.library_layout.setContentsMargins(5, 5, 5, 5)
+        self.library_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+        scroll_area.setWidget(self.library_container)
+        layout.addWidget(scroll_area)
+
+        # Заполняем игры
+        self.populate_library_games()
+
+        return page
+
+    def create_store_page(self):
+        """Создает страницу магазина"""
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(40, 30, 40, 30)
+        layout.setSpacing(25)
+
+        store_header = QLabel("🛒 МАГАЗИН ИГР")
+        store_header.setStyleSheet("""
+            QLabel {
+                color: white;
+                font-size: 28px;
+                font-weight: bold;
+                padding: 10px 0px;
+            }
+        """)
+        layout.addWidget(store_header)
+
+        # Добавляем фильтры по жанрам и поиск
+        filter_layout = QHBoxLayout()
+        
+        filter_label = QLabel("Фильтр по жанру:")
+        filter_label.setStyleSheet("color: rgba(107, 142, 255, 0.8); font-size: 14px; font-weight: bold;")
+        filter_layout.addWidget(filter_label)
+        
+        self.genre_filter = QComboBox()
+        self.genre_filter.setFixedHeight(35)
+        self.genre_filter.setStyleSheet("""
+            QComboBox {
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 10px;
+                padding: 5px 15px;
+                font-size: 14px;
+            }
+            QComboBox::drop-down {
+                border: none;
+            }
+            QComboBox::down-arrow {
+                image: none;
+                border-left: 1px solid rgba(255, 255, 255, 0.3);
+                width: 20px;
+            }
+            QComboBox QAbstractItemView {
+                background: rgba(30, 41, 59, 0.9);
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 10px;
+                selection-background-color: rgba(107, 142, 255, 0.6);
+            }
+        """)
+        
+        # Добавляем опции фильтра
+        self.genre_filter.addItem("Все жанры")
+        genres = set(game.genre for game in self.store_games)
+        for genre in sorted(genres):
+            self.genre_filter.addItem(genre)
+        
+        self.genre_filter.currentTextChanged.connect(self.filter_store_games)
+        filter_layout.addWidget(self.genre_filter)
+        
+        # Поле поиска по названию
+        search_label = QLabel("Поиск:")
+        search_label.setStyleSheet("color: rgba(107, 142, 255, 0.8); font-size: 14px; font-weight: bold;")
+        filter_layout.addWidget(search_label)
+        
+        self.search_input = QLineEdit()
+        self.search_input.setFixedHeight(35)
+        self.search_input.setPlaceholderText("Введите название игры...")
+        self.search_input.setStyleSheet("""
+            QLineEdit {
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 10px;
+                padding: 5px 15px;
+                font-size: 14px;
+            }
+            QLineEdit:focus {
+                border: 1px solid rgba(107, 142, 255, 0.6);
+            }
+            QLineEdit::placeholder {
+                color: rgba(255, 255, 255, 0.5);
+            }
+        """)
+        self.search_input.textChanged.connect(self.filter_store_games)
+        filter_layout.addWidget(self.search_input)
+        
+        filter_layout.addStretch()
+        layout.addLayout(filter_layout)
+
+        available_games = [game for game in self.store_games if not any(lib_game.title == game.title for lib_game in self.library_games)]
+        self.games_count = QLabel(f"Доступно игр: {len(available_games)}")
+        self.games_count.setStyleSheet("color: rgba(107, 142, 255, 0.8); font-size: 16px; font-weight: bold;")
+        layout.addWidget(self.games_count)
+
+        # Создаем контейнер для игр
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setStyleSheet("QScrollArea { border: none; background: transparent; }")
+        
+        self.store_container = QWidget()
+        self.store_layout = QGridLayout(self.store_container)
+        self.store_layout.setSpacing(20)
+        self.store_layout.setContentsMargins(5, 5, 5, 5)
+        self.store_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+        scroll_area.setWidget(self.store_container)
+        layout.addWidget(scroll_area)
+
+        # Заполняем игры
+        self.populate_store_games()
+
+        return page
+
+    def create_settings_page(self):
+        """Создает страницу настроек"""
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(40, 30, 40, 30)
+        layout.setSpacing(25)
+
+        settings_header = QLabel("⚙️ НАСТРОЙКИ")
+        settings_header.setStyleSheet("""
+            QLabel {
+                color: white;
+                font-size: 28px;
+                font-weight: bold;
+                padding: 10px 0px;
+            }
+        """)
+        layout.addWidget(settings_header)
+
+        # Секция выбора темы
+        theme_section = QLabel("🎨 Внешний вид")
+        theme_section.setStyleSheet("color: rgba(107, 142, 255, 0.8); font-size: 18px; font-weight: bold;")
+        layout.addWidget(theme_section)
+
+        theme_layout = QGridLayout()
+        theme_layout.setSpacing(10)
+        
+        current_theme = self.settings_manager.get_setting("theme", "glass")
+        theme_names = self.theme_manager.get_theme_names()
+        display_names = self.theme_manager.get_theme_display_names()
+        
+        row, col = 0, 0
+        max_cols = 3  # Увеличиваем количество колонок для лучшего отображения
+        
+        for i, (theme_key, theme_name) in enumerate(zip(theme_names, display_names)):
+            # Используем статические кнопки без анимации для настроек
+            theme_btn = StaticGlassButton(theme_name)
+            theme_btn.setFixedHeight(45)
+            theme_btn.setCheckable(True)
+            theme_btn.setChecked(theme_key == current_theme)
+            
+            theme_btn.clicked.connect(lambda checked, key=theme_key: self.change_theme(key))
+            theme_layout.addWidget(theme_btn, row, col)
+            
+            col += 1
+            if col >= max_cols:
+                col = 0
+                row += 1
+        
+        layout.addLayout(theme_layout)
+        
+        # Информация о приложении
+        info_section = QLabel("ℹ️ О приложении")
+        info_section.setStyleSheet("color: rgba(107, 142, 255, 0.8); font-size: 18px; font-weight: bold; margin-top: 20px;")
+        layout.addWidget(info_section)
+        
+        app_info = QLabel(
+            "Game Nexus Pro v1.0.0\n\n"
+            "Ultimate Gaming Platform\n"
+            "© 2024 Game Nexus Team\n\n"
+            "Все права защищены."
+        )
+        app_info.setStyleSheet("color: #cccccc; font-size: 14px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px;")
+        app_info.setWordWrap(True)
+        layout.addWidget(app_info)
+        
+        layout.addStretch()
+
+        return page
+
+    def populate_library_games(self):
+        """Заполняет библиотеку играми"""
+        try:
+            # Очищаем старые карточки
+            for i in reversed(range(self.library_layout.count())):
+                item = self.library_layout.itemAt(i)
+                if item.widget():
+                    item.widget().deleteLater()
+
+            if not self.library_games:
+                # Показываем сообщение, если игр нет
+                no_games_label = QLabel("📚 В библиотеке пока нет игр")
+                no_games_label.setStyleSheet("""
+                    QLabel {
+                        color: #cccccc;
+                        font-size: 18px;
+                        font-weight: bold;
+                        background: none;
+                    }
+                """)
+                no_games_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.library_layout.addWidget(no_games_label, 0, 0)
+                return
+            
+            # Определяем количество колонок
+            container_width = self.library_container.width()
+            card_width = 300
+            spacing = 20
+            available_width = container_width - 40
+            
+            max_cols = max(1, available_width // (card_width + spacing))
+            row, col = 0, 0
+            
+            for game in self.library_games:
+                # Создаем карточку игры
+                game_card = GlassLibraryGameCard(game, self.theme_manager, self.media_manager)
+                
+                # Подключаем сигналы
+                game_card.info_btn.clicked.connect(lambda checked=False, g=game: self.show_game_info(g))
+                game_card.action_btn.clicked.connect(lambda checked=False, g=game: self.play_or_download_library_game(g))
+                game_card.remove_btn.clicked.connect(lambda checked=False, g=game: self.remove_from_library(g))
+                
+                self.library_layout.addWidget(game_card, row, col)
+                
+                col += 1
+                if col >= max_cols:
+                    col = 0
+                    row += 1
+
+            # Добавляем растягивающиеся колонки
+            for i in range(max_cols):
+                self.library_layout.setColumnStretch(i, 1)
+                
+            self.library_layout.setRowStretch(row + 1, 1)
+
+        except Exception as e:
+            print(f"Ошибка при заполнении библиотеки: {e}")
+
+    def populate_store_games(self):
+        """Заполняет магазин играми"""
+        try:
+            # Очищаем старые карточки
+            for i in reversed(range(self.store_layout.count())):
+                item = self.store_layout.itemAt(i)
+                if item.widget():
+                    item.widget().deleteLater()
+
+            available_games = [game for game in self.store_games if not any(lib_game.title == game.title for lib_game in self.library_games)]
+            
+            if not available_games:
+                # Показываем сообщение, если игр нет
+                no_games_label = QLabel("🎮 Игры не найдены")
+                no_games_label.setStyleSheet("""
+                    QLabel {
+                        color: #cccccc;
+                        font-size: 18px;
+                        font-weight: bold;
+                        background: none;
+                    }
+                """)
+                no_games_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.store_layout.addWidget(no_games_label, 0, 0)
+                return
+            
+            # Определяем количество колонок
+            container_width = self.store_container.width()
+            card_width = 300
+            spacing = 20
+            available_width = container_width - 40
+            
+            max_cols = max(1, available_width // (card_width + spacing))
+            row, col = 0, 0
+            
+            for game in available_games:
+                # Создаем карточку игры
+                game_card = GlassStoreGameCard(game, self.theme_manager, self.media_manager)
+                
+                # Подключаем сигналы
+                game_card.info_btn.clicked.connect(lambda checked=False, g=game: self.show_game_info(g))
+                game_card.add_btn.clicked.connect(lambda checked=False, g=game: self.add_to_library(g))
+                game_card.download_btn.clicked.connect(lambda checked=False, g=game: self.download_game(g))
+                
+                self.store_layout.addWidget(game_card, row, col)
+                
+                col += 1
+                if col >= max_cols:
+                    col = 0
+                    row += 1
+
+            # Добавляем растягивающиеся колонки
+            for i in range(max_cols):
+                self.store_layout.setColumnStretch(i, 1)
+                
+            self.store_layout.setRowStretch(row + 1, 1)
+
+        except Exception as e:
+            print(f"Ошибка при заполнении магазина: {e}")
+
+    def filter_store_games(self):
+        """Фильтрует игры в магазине по выбранному жанру и поисковому запросу"""
+        try:
+            selected_genre = self.genre_filter.currentText()
+            search_text = self.search_input.text().strip().lower()
+            
+            # Очищаем старые карточки
+            for i in reversed(range(self.store_layout.count())):
+                item = self.store_layout.itemAt(i)
+                if item.widget():
+                    item.widget().deleteLater()
+
+            available_games = [game for game in self.store_games if not any(lib_game.title == game.title for lib_game in self.library_games)]
+            
+            # Применяем фильтр по жанру
+            if selected_genre != "Все жанры":
+                available_games = [game for game in available_games if game.genre == selected_genre]
+            
+            # Применяем поиск по названию
+            if search_text:
+                available_games = [game for game in available_games if search_text in game.title.lower()]
+            
+            if not available_games:
+                # Показываем сообщение, если игр нет
+                no_games_label = QLabel("🎮 Игры не найдены")
+                no_games_label.setStyleSheet("""
+                    QLabel {
+                        color: #cccccc;
+                        font-size: 18px;
+                        font-weight: bold;
+                        background: none;
+                    }
+                """)
+                no_games_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.store_layout.addWidget(no_games_label, 0, 0)
+                return
+            
+            # Обновляем счетчик игр
+            self.games_count.setText(f"Доступно игр: {len(available_games)}")
+            
+            # Определяем количество колонок
+            container_width = self.store_container.width()
+            card_width = 300
+            spacing = 20
+            available_width = container_width - 40
+            
+            max_cols = max(1, available_width // (card_width + spacing))
+            row, col = 0, 0
+            
+            for game in available_games:
+                # Создаем карточку игры
+                game_card = GlassStoreGameCard(game, self.theme_manager, self.media_manager)
+                
+                # Подключаем сигналы
+                game_card.info_btn.clicked.connect(lambda checked=False, g=game: self.show_game_info(g))
+                game_card.add_btn.clicked.connect(lambda checked=False, g=game: self.add_to_library(g))
+                game_card.download_btn.clicked.connect(lambda checked=False, g=game: self.download_game(g))
+                
+                self.store_layout.addWidget(game_card, row, col)
+                
+                col += 1
+                if col >= max_cols:
+                    col = 0
+                    row += 1
+
+            # Добавляем растягивающиеся колонки
+            for i in range(max_cols):
+                self.store_layout.setColumnStretch(i, 1)
+                
+            self.store_layout.setRowStretch(row + 1, 1)
+
+        except Exception as e:
+            print(f"Ошибка при фильтрации игр: {e}")
+
+    def apply_full_theme(self):
+        """Применяет полную тему после создания интерфейса"""
+        try:
+            self.theme_manager.apply_theme_to_app(QApplication.instance())
+            self.apply_sidebar_theme()
+            self.apply_content_theme()
+            self.apply_glass_theme()
+        except Exception as e:
+            print(f"Ошибка при применении полной темы: {e}")
+
+    def apply_sidebar_theme(self):
+        """Применяет тему к сайдбару"""
+        try:
+            theme = self.theme_manager.get_theme()
+            
+            for btn in self.nav_buttons:
+                btn.setStyleSheet(f"""
+                    QPushButton {{
+                        background: rgba(255, 255, 255, 0.05);
+                        color: {theme['text']};
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        border-radius: 10px;
+                        font-size: 14px;
+                        font-weight: bold;
+                        text-align: left;
+                        padding-left: 20px;
+                    }}
+                    QPushButton:hover {{
+                        background: rgba(255, 255, 255, 0.1);
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                    }}
+                    QPushButton:pressed {{
+                        background: rgba(255, 255, 255, 0.15);
+                    }}
+                """)
+            
+            self.stats_frame.setStyleSheet(f"""
+                QFrame {{
+                    background: rgba(255, 255, 255, 0.05);
+                    border-radius: 15px;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                }}
+            """)
+            
+        except Exception as e:
+            print(f"Ошибка применения темы сайдбара: {e}")
+
+    def apply_content_theme(self):
+        """Применяет тему к контентной области"""
+        try:
+            theme = self.theme_manager.get_theme()
+            
+            # Обновляем заголовки страниц
+            for widget in [self.library_page, self.store_page, self.settings_page]:
+                for child in widget.findChildren(QLabel):
+                    if child.text() in ["🎮 МОЯ БИБЛИОТЕКА", "🛒 МАГАЗИН ИГР", "⚙️ НАСТРОЙКИ"]:
+                        child.setStyleSheet(f"""
+                            QLabel {{
+                                color: {theme['text']};
+                                font-size: 28px;
+                                font-weight: bold;
+                                padding: 10px 0px;
+                            }}
+                        """)
+            
+        except Exception as e:
+            print(f"Ошибка применения темы контента: {e}")
+
+    def apply_glass_theme(self):
+        """Применяет тему к стеклянным элементам"""
+        try:
+            theme = self.theme_manager.get_theme()
+            
+            # Применяем тему к сайдбару
+            self.sidebar.set_glass_style(
+                theme.get('glass_color', QColor(255, 255, 255, 30)),
+                theme.get('glass_border', QColor(255, 255, 255, 80))
+            )
+            
+            # Применяем тему к статистике
+            self.stats_frame.set_glass_style(
+                theme.get('glass_color', QColor(255, 255, 255, 30)),
+                theme.get('glass_border', QColor(255, 255, 255, 80))
+            )
+            
+        except Exception as e:
+            print(f"Ошибка применения стеклянной темы: {e}")
+
+    def load_settings(self):
+        """Загрузка настроек"""
+        try:
+            self.apply_sidebar_theme()
+            self.apply_content_theme()
+            self.apply_glass_theme()
+            
+        except Exception as e:
+            print(f"Ошибка загрузки настроек: {e}")
+
+    def change_theme(self, theme_name):
+        """Смена темы"""
+        try:
+            # Устанавливаем новую тему
+            self.settings_manager.set_setting("theme", theme_name)
+            
+            # Применяем тему ко всему приложению
+            self.apply_full_theme()
+            
+            # Обновляем карточки игр
+            self.populate_store_games()
+            self.populate_library_games()
+            
+            QMessageBox.information(self, "Тема изменена", f"Тема успешно изменена на {self.theme_manager.themes[theme_name]['name']}!")
+            
+        except Exception as e:
+            print(f"Ошибка смены темы: {e}")
+            QMessageBox.critical(self, "Ошибка", f"Не удалось изменить тему: {str(e)}")
+
+    def show_library(self):
+        """Показывает страницу библиотеки"""
+        self.content_stack.setCurrentWidget(self.library_page)
+        self.populate_library_games()
+
+    def show_store(self):
+        """Показывает страницу магазина"""
+        self.content_stack.setCurrentWidget(self.store_page)
+        self.populate_store_games()
+
+    def show_settings(self):
+        """Показывает страницу настроек"""
+        self.content_stack.setCurrentWidget(self.settings_page)
+
+    def show_previous_page(self):
+        """Возвращает на предыдущую страницу"""
+        if hasattr(self, 'previous_page'):
+            self.content_stack.setCurrentWidget(self.previous_page)
+        else:
+            self.content_stack.setCurrentWidget(self.store_page)
+
+    def show_game_info(self, game: Game):
+        """Показывает страницу с информацией об игре"""
+        try:
+            # Сохраняем текущую страницу для возврата
+            self.previous_page = self.content_stack.currentWidget()
+            
+            self.game_info_page.show_game_info(game)
+            self.content_stack.setCurrentWidget(self.game_info_page)
+        except Exception as e:
+            print(f"Ошибка при показе информации об игре: {e}")
+            QMessageBox.critical(self, "Ошибка", f"Не удалось загрузить информацию об игре: {str(e)}")
+
+    def on_page_changed(self, index):
+        """Обрабатывает изменение страницы"""
+        current_widget = self.content_stack.widget(index)
+        
+        if current_widget != self.game_info_page:
+            self.game_info_page.stop_video()
+
+    def download_game(self, game: Game):
+        """Скачивает игру - ОТКРЫВАЕТ ССЫЛКУ В БРАУЗЕРЕ"""
+        try:
+            print(f"Попытка открыть ссылку для скачивания: {game.download_url}")
+            
+            if game.download_url and game.download_url.startswith(('http://', 'https://')):
+                # Открываем ссылку в браузере по умолчанию
+                success = webbrowser.open(game.download_url)
+                
+                if success:
+                    QMessageBox.information(self, "Установка", 
+                                          f"Запуск установки игры '{game.title}'\n\n"
+                                          f"Ссылка открыта в вашем браузере.\n"
+                                          f"Размер: {game.file_size}")
+                    print(f"Ссылка успешно открыта в браузере: {game.download_url}")
+                else:
+                    QMessageBox.warning(self, "Ошибка", 
+                                      f"Не удалось открыть ссылку в браузере.\n\n"
+                                      f"Скопируйте ссылку вручную:\n{game.download_url}")
+                    print(f"Не удалось открыть ссылку в браузере: {game.download_url}")
+            else:
+                QMessageBox.warning(self, "Ошибка", 
+                                  f"Для игры '{game.title}' не указана ссылка для скачивания.")
+                print(f"Некорректная ссылка для скачивания: {game.download_url}")
+            
+        except Exception as e:
+            print(f"Ошибка при открытии ссылки для скачивания игры {game.title}: {e}")
+            QMessageBox.critical(self, "Ошибка", 
+                              f"Не удалось открыть ссылку для скачивания игры '{game.title}': {str(e)}")
+
+    def add_to_library(self, game: Game):
+        """Добавляет игру в библиотеку"""
+        try:
+            print(f"Добавление игры в библиотеку: {game.title}")
+            
+            # Проверяем, нет ли уже этой игры в библиотеке
+            if any(lib_game.title == game.title for lib_game in self.library_games):
+                QMessageBox.information(self, "Информация", 
+                                      f"Игра '{game.title}' уже есть в вашей библиотеке!")
+                return
+            
+            library_game = Game(
+                title=game.title,
+                description=game.description,
+                genre=game.genre,
+                rating=game.rating,
+                is_installed=False,
+                in_library=True,
+                download_url=game.download_url,
+                file_size=game.file_size,
+                avatar_url=game.avatar_url,
+                screenshots=game.screenshots,
+                video_urls=game.video_urls,
+                executable_path="",
+                min_os=game.min_os,
+                min_processor=game.min_processor,
+                min_memory=game.min_memory,
+                min_graphics=game.min_graphics,
+                min_storage=game.min_storage,
+                rec_os=game.rec_os,
+                rec_processor=game.rec_processor,
+                rec_memory=game.rec_memory,
+                rec_graphics=game.rec_graphics,
+                rec_storage=game.rec_storage
+            )
+            
+            self.settings_manager.save_library_game(library_game)
+            self.library_games = self.settings_manager.get_library_games()
+            self.populate_store_games()
+            self.populate_library_games()
+            
+            QMessageBox.information(self, "Успех", 
+                                  f"Игра '{game.title}' добавлена в библиотеку!")
+            
+        except Exception as e:
+            print(f"Ошибка при добавлении игры в библиотеку {game.title}: {e}")
+            QMessageBox.critical(self, "Ошибка", f"Не удалось добавить игру '{game.title}' в библиотеку: {str(e)}")
+
+    def remove_from_library(self, game: Game):
+        """Удаляет игру из библиотеки"""
+        try:
+            reply = QMessageBox.question(self, "Подтверждение", 
+                                       f"Вы уверены, что хотите удалить игру '{game.title}' из библиотеки?",
+                                       QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            
+            if reply == QMessageBox.StandardButton.Yes:
+                self.settings_manager.remove_library_game(game.title)
+                self.library_games = self.settings_manager.get_library_games()
+                self.populate_store_games()
+                self.populate_library_games()
+                
+                QMessageBox.information(self, "Успех", 
+                                      f"Игра '{game.title}' удалена из библиотеки!")
+                
+        except Exception as e:
+            print(f"Ошибка при удалении игры {game.title}: {e}")
+            QMessageBox.critical(self, "Ошибка", f"Не удалось удалить игру '{game.title}': {str(e)}")
+
+    def play_or_download_library_game(self, game: Game):
+        """Запускает или скачивает игру из библиотеки"""
+        try:
+            if game.is_installed:
+                QMessageBox.information(self, "Запуск игры", 
+                                      f"Игра '{game.title}' запускается...\n\n(Это демонстрация - в реальном приложении игра бы запустилась)")
+                print(f"Запуск игры: {game.title}")
+            else:
+                # Для игр в библиотеке также открываем ссылку в браузере
+                self.download_game(game)
+                        
+        except Exception as e:
+            print(f"Ошибка при работе с игрой {game.title}: {e}")
+            QMessageBox.critical(self, "Ошибка", f"Не удалось выполнить действие с игрой '{game.title}': {str(e)}")
+
+    def closeEvent(self, event):
+        """Обрабатывает закрытие приложения"""
+        if not self.isFullScreen():
+            self.settings_manager.set_setting("window_size", [self.width(), self.height()])
+            self.settings_manager.set_setting("window_position", [self.x(), self.y()])
+        
+        self.game_info_page.stop_video()
+        event.accept()
+
+def main():
+    try:
+        app = QApplication(sys.argv)
+        app.setStyle('Fusion')
+        app.setApplicationName("Game Nexus Pro")
+        app.setApplicationVersion("1.0.0")
+
+        # Базовые стили
+        app.setStyleSheet("""
+            QMainWindow, QWidget {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 rgba(15, 23, 42, 0.9), stop:1 rgba(30, 41, 59, 0.9));
+                color: white;
+            }
+            QLabel {
+                background: transparent;
+                color: white;
+            }
+        """)
+
+        loading_screen = LoadingScreen()
+        launcher = GameLauncher()
+        launcher.hide()
+        
+        def show_main_launcher():
+            try:
+                loading_screen.close()
+                launcher.show()
+                launcher.raise_()
+                launcher.activateWindow()
+            except Exception as e:
+                print(f"Ошибка показа лаунчера: {e}")
+                launcher.show()
+
+        loading_screen.loading_complete.connect(show_main_launcher)
+        loading_screen.show()
+        QTimer.singleShot(500, loading_screen.start_loading)
+        
+        result = app.exec()
+        return result
+        
+    except Exception as e:
+        print(f"Ошибка при запуске приложения: {e}")
+        QMessageBox.critical(None, "Критическая ошибка", f"Приложение не может быть запущено: {str(e)}")
+        return 1
+
+if __name__ == '__main__':
+    sys.exit(main())
