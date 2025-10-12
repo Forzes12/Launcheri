@@ -43,7 +43,7 @@ class UpdateManager:
     def __init__(self, settings_manager):
         self.settings_manager = settings_manager
         self.update_url = "https://github.com/Forzes12/Launcheri/blob/main/version.json"
-        self.current_version = "1.1.0"
+        self.current_version = "1.4.0"
         self.latest_version = None
         self.update_available = False
         self.update_button = None
