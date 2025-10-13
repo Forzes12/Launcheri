@@ -1,5 +1,10 @@
 {
-    "version": "1.7.0",
-    "download_url": "https://github.com/Forzes12/Launcheri/releases/latest",
-    "changelog": "Исправлены ошибки, добавлены новые функции"
+    "version": "1.4.0",
+    "download_url": "https://github.com/Forzes12/Launcheri/releases/download/v1.4.0/GameNexusLauncher.exe",
+    "release_notes": [
+        "• Добавлена система автоматических обновлений",
+        "• Улучшена производительность",
+        "• Исправлены мелкие ошибки"
+    ],
+    "release_date": "2024-12-19"
 }
