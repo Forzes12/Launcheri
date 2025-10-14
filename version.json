@@ -1,11 +1,12 @@
 {
-    "version": "1.4.0",
-    "download_url": "https://github.com/Forzes12/Launcheri/releases/v1.5.0/ForzLaunch.exe",
+    "version": "1.5.0",
+    "download_url": "https://github.com/Forzes12/Launcheri/releases/download/v1.5.0/ForzLaunch.exe",
     "release_notes": [
-        "• Добавлена система автоматических обновлений",
-        "• Улучшена производительность лаунчера",
-        "• Исправлены ошибки интерфейса",
-        "• Добавлены новые игры в библиотеку"
+        "✅ Добавлена система автоматических обновлений",
+        "✅ Улучшена производительность", 
+        "✅ Исправлены ошибки интерфейса",
+        "✅ Добавлены новые игры в библиотеку"
     ],
-    "release_date": "2024-12-19"
+    "release_date": "2024-12-19",
+    "min_required_version": "1.3.0"
 }
