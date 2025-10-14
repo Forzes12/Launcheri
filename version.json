@@ -1,13 +1,6 @@
 {
-    "version": "1.5.0",
-    "download_url": "https://github.com/Forzes12/Launcheri/releases/download/v1.5.0/GameNexusLauncher.exe",
-    "release_notes": [
-        "• Добавлены новые игры: Elden Ring, GTA VI",
-        "• Улучшен интерфейс магазина",
-        "• Добавлены новые темы оформления",
-        "• Оптимизирована производительность",
-        "• Исправлены ошибки загрузки медиа"
-    ],
-    "release_date": "2024-12-20",
-    "min_required_version": "1.4.0"
+  "version": "1.5.0",
+  "download_url": "https://your-server.com/ForzLauncher/releases/v1.5.0/ForzLauncher.exe",
+  "release_notes": "ForzLauncher v1.5.0 - Новый функционал...",
+  "publish_date": "2024-01-15"
 }
