@@ -1,7 +1,11 @@
 {
-  "version": "1.5.0",
-  "download_url": "https://your-server.com/ForzLauncher/releases/v1.5.0/ForzLauncher.exe",
-  "release_notes": "ForzLauncher v1.5.0 - Новый функционал...",
-  "publish_date": "2024-01-15"
-  "download_url": "https://github.com/Forzes12/Launcheri/releases/download/v1.5.0/ForzLauncher.exe"
+    "version": "1.4.0",
+    "download_url": "https://github.com/Forzes12/Launcheri/releases/download/v1.4.0/GameNexusLauncher.exe",
+    "release_notes": [
+        "• Добавлена система автоматических обновлений",
+        "• Улучшена производительность лаунчера",
+        "• Исправлены ошибки интерфейса",
+        "• Добавлены новые игры в библиотеку"
+    ],
+    "release_date": "2024-12-19"
 }
