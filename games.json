@@ -1,35 +1,5 @@
 [
   {
-    "title": "Cyberpunk 2077",
-    "description": "Научно-фантастическая RPG в открытом мире от создателей The Witcher. Погрузитесь в мрачное будущее Найт-Сити.",
-    "genre": "RPG",
-    "rating": 4.8,
-    "is_installed": false,
-    "in_library": false,
-    "download_url": "https://byrutgame.org/index.php?do=download&id=168145&sid=1",
-    "file_size": "70 GB",
-    "avatar_url": "https://i.postimg.cc/Rhjh7Zf6/i_1.png",
-    "screenshots": [
-      "https://i.postimg.cc/zvRjZ0VZ/1665931851-ss-1f1f380757cd18aecd83344329e8ed223b03a427-1920x1080.jpg",
-      "https://i.postimg.cc/FzcBg9b5/1665931818-ss-ad01aa3d3bf4d141280c79a239af402560a4ab88-1920x1080.jpg"
-    ],
-    "video_urls": [
-      "https://youtu.be/aSrFWinrkeQ",
-      "https://youtu.be/zBrkG3aeWCc"
-    ],
-    "executable_path": "",
-    "min_os": "Windows 10",
-    "min_processor": "Intel Core i5-3570K",
-    "min_memory": "8 GB RAM",
-    "min_graphics": "NVIDIA GeForce GTX 780",
-    "min_storage": "70 GB",
-    "rec_os": "Windows 10",
-    "rec_processor": "Intel Core i7-4790",
-    "rec_memory": "12 GB RAM",
-    "rec_graphics": "NVIDIA GeForce GTX 1060",
-    "rec_storage": "70 GB"
-  },
-  {
     "title": "The Witcher 3: Wild Hunt",
     "description": "Эпическая RPG о ведьмаке Геральте из Ривии. Отправляйтесь в опасное путешествие по огромному фэнтезийному миру.",
     "genre": "RPG",
