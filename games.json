@@ -33,6 +33,7 @@
     "rec_memory": "8 GB RAM",
     "rec_graphics": "NVIDIA GPU GeForce GTX 770",
     "rec_storage": "50 GB"
+    "min_launcher_version": "1.5.0"
   },
   {
     "title": "Just Cause 4",
@@ -68,6 +69,7 @@
     "rec_memory": "8 GB RAM",
     "rec_graphics": "NVIDIA GeForce GTX 770 (2 ГБ)",
     "rec_storage": "50 GB"
+    "min_launcher_version": "1.5.0"
   },
   {
     "title": "Dying Light 2 Stay Human",
@@ -103,6 +105,7 @@
     "rec_memory": "16 GB RAM",
     "rec_graphics": "NVIDIA GeForce RTX 2060 (6 Гб) - AMD Radeon RX Vega 56 (8 Гб)",
     "rec_storage": "41.47 GB"
+    "min_launcher_version": "1.5.0"
   },
   {
     "title": "Dying Light: The Beast",
@@ -138,6 +141,7 @@
     "rec_memory": "16 GB RAM",
     "rec_graphics": "NVIDIA GeForce RTX 2060 (6 Гб) - AMD Radeon RX Vega 56 (8 Гб)",
     "rec_storage": "41.47 GB"
+    "min_launcher_version": "1.5.0"
   },
   {
     "title": "Marvel's Spider-Man 2",
@@ -173,6 +177,7 @@
     "rec_memory": "32 GB RAM",
     "rec_graphics": "NVIDIA GeForce RTX 4090",
     "rec_storage": "88.08 GB"
+    "min_launcher_version": "1.5.0"
   },
   {
     "title": "Forza Horizon 5",
@@ -208,6 +213,7 @@
     "rec_memory": "16 GB RAM",
     "rec_graphics": "NVIDIA GTX 1070 - AMD RX 590 - Intel Arc A750",
     "rec_storage": "147.77 GB"
+    "min_launcher_version": "1.0.0"
   },
   {
     "title": "Forza Horizon 4 Ultimate Edition",
@@ -243,6 +249,7 @@
     "rec_memory": "12 GB RAM",
     "rec_graphics": "NVIDIA GTX 1060 - AMD RX 580",
     "rec_storage": "100 GB"
+    "min_launcher_version": "1.0.0"
   },
   {
     "title": "Forza Horizon 3",
@@ -278,6 +285,7 @@
     "rec_memory": "12 GB RAM",
     "rec_graphics": "NVIDIA GTX 970 - AMD R9 290X",
     "rec_storage": "60 GB"
+    "min_launcher_version": "1.0.0"
   },
   {
     "title": "Call of Duty: Modern Warfare 2",
@@ -307,6 +315,7 @@
     "rec_memory": "12 GB RAM",
     "rec_graphics": "NVIDIA GeForce GTX 1060 / AMD Radeon RX 580",
     "rec_storage": "72 GB"
+    "min_launcher_version": "1.0.0"
   },
   {
     "title": "Call of Duty: Modern Warfare 3 (2023)",
@@ -344,6 +353,7 @@
     "rec_memory": "16 GB RAM",
     "rec_graphics": "NVIDIA GeForce GTX 1080 Ti - AMD Radeon RX 6700 XT",
     "rec_storage": "149 GB SSD"
+    "min_launcher_version": "1.0.0"
   },
   {
     "title": "Hollow Knight Silksong",
@@ -377,6 +387,7 @@
     "rec_memory": "8 GB RAM",
     "rec_graphics": "NVIDIA GeForce GTX 560 - AMD Radeon HD 6870",
     "rec_storage": "10 GB"
+    "min_launcher_version": "1.0.0"
   },
   {
     "title": "Elden Ring",
