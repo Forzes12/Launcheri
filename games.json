@@ -390,34 +390,39 @@
     "min_launcher_version": "1.7.0"
   },
   {
-    "title": "Elden Ring",
-    "description": "Эпическая фэнтезийная RPG от создателей Dark Souls. Исследуйте огромный открытый мир Межземья, сражайтесь с могущественными врагами и раскройте тайны Древнего Кольца.",
-    "genre": "RPG, Экшены, Приключенческие",
+    "title": "Little Nightmares 3 (III)",
+    "description": "игра в жанрах головоломки, платформера и хоррор-приключения, выпущенная 10 октября 2025 года.",
+    "genre": "Приключенческие, Инди, Экшены, Платформеры, Ролевые",
     "rating": 4.9,
     "is_installed": false,
     "in_library": false,
-    "download_url": "https://itorrents-igruha.net/engine/download.php?id=91845",
-    "file_size": "60 GB",
-    "avatar_url": "https://i.postimg.cc/8CqG3y2v/elden-ring-cover.jpg",
+    "download_url": "https://itorrents-igruha.net/engine/download.php?id=91979",
+    "file_size": "8.5 GB",
+    "avatar_url": "https://i.postimg.cc/mkb50Cp1/1697041363-library-600x900-2x-1-1.jpg",
     "screenshots": [
-      "https://i.postimg.cc/8CqG3y2v/elden-ring-1.jpg",
-      "https://i.postimg.cc/8CqG3y2v/elden-ring-2.jpg",
-      "https://i.postimg.cc/8CqG3y2v/elden-ring-3.jpg"
+      "https://i.postimg.cc/BZgy27tV/1692778601-ss-0266e383a8bca23411d6a7676aa9ba27cc27d487.jpg",
+      "https://i.postimg.cc/hPZ55JLd/1692778539-ss-3180ec3ac73e13f7affc1b6869bb87df2dc6f7c0.jpg",
+      "https://i.postimg.cc/T3ZHTZNB/1692778525-ss-3317c0038f9ebdc75beb8ce4b92368285cc17f94.jpg",
+      "https://i.postimg.cc/8CMXctqR/1692778555-ss-9176e8a8463ea18a0d4ac5cb62455d7c8e69cb67.jpg",
+      "https://i.postimg.cc/MTwPQ1wZ/1692778589-ss-bb507b20463211ae9c76e09b950f0a70f8213afa.jpg",
+      "https://i.postimg.cc/50mPqj9F/1692778583-ss-c4ff1a965b1a769314a9952f40e6bf445b2adfac.jpg"
+      "https://i.postimg.cc/cJyTpfrx/1692778569-ss-d0802b426b1116c4d0f7c92cc81de359bc342345.jpg"
+      "https://i.postimg.cc/W3s83jGH/1692778519-ss-ed46a961e80fcc23814e06259c6e0d515a0c371a.jpg"
     ],
     "video_urls": [
-      "https://youtu.be/E3Huy2cdih0"
+      "https://youtu.be/XFHOsobwFrA"
     ],
     "executable_path": "",
-    "min_os": "Windows 10",
-    "min_processor": "Intel Core i5-8400 - AMD Ryzen 3 3300X",
-    "min_memory": "12 GB RAM",
-    "min_graphics": "NVIDIA GeForce GTX 1060 3GB - AMD Radeon RX 580 4GB",
-    "min_storage": "60 GB",
-    "rec_os": "Windows 11",
-    "rec_processor": "Intel Core i7-8700K - AMD Ryzen 5 3600X",
-    "rec_memory": "16 GB RAM",
-    "rec_graphics": "NVIDIA GeForce GTX 1070 8GB - AMD Radeon RX Vega 56 8GB",
-    "rec_storage": "60 GB",
+    "min_os": "Windows 7/8/10",
+    "min_processor": "Intel Core 2 Duo E5200 - AMD Athlon 64 X2 5000+",
+    "min_memory": "4 GB RAM",
+    "min_graphics": "NVIDIA GeForce 9800 GT - AMD HD 5670",
+    "min_storage": "10 GB",
+    "rec_os": "Windows 10",
+    "rec_processor": "Intel Core i5 - AMD FX-6300",
+    "rec_memory": "8 GB RAM",
+    "rec_graphics": "NVIDIA GeForce GTX 560 - AMD Radeon HD 6870",
+    "rec_storage": "10 GB",
     "min_launcher_version": "1.7.0"
   }
 ]
