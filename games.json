@@ -33,7 +33,7 @@
     "rec_memory": "8 GB RAM",
     "rec_graphics": "NVIDIA GPU GeForce GTX 770",
     "rec_storage": "50 GB",
-    "min_launcher_version": "1.8.1"
+    "min_launcher_version": "1.8.0"
   },
   {
     "title": "Just Cause 4",
@@ -423,6 +423,6 @@
     "rec_memory": "8 GB RAM",
     "rec_graphics": "NVIDIA GeForce GTX 560 - AMD Radeon HD 6870",
     "rec_storage": "10 GB",
-    "min_launcher_version": "1.8.1"
+    "min_launcher_version": "1.8.0"
   }
 ]
