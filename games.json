@@ -425,38 +425,4 @@
     "rec_storage": "10 GB",
     "min_launcher_version": "1.8.2"
   },
-  {
-    "title": "Spider-Man: Miles Morales",
-  "description": "Отправляйтесь в захватывающее приключение вместе с Майлзом Моралесом, который осваивает свои новые паучьи способности. Исследуйте зимний Нью-Йорк, сражайтесь с могущественными врагами и станьте настоящим супергероем в этой эпической истории о чести, ответственности и наследии.",
-  "genre": "Экшены, Приключенческие, Ролевые",
-  "rating": 4.8,
-  "is_installed": false,
-  "in_library": false,
-  "download_url": "https://itorrents-igruha.net/engine/download.php?id=71292",
-  "file_size": "75 GB",
-  "avatar_url": "https://i.postimg.cc/rpb5jLMG/1726233357-cover.jpg",
-  "screenshots": [
-    "https://i.postimg.cc/x1mQ8vqq/1665828165-milesmorales-hero-ps5-legal.jpg",
-    "https://i.postimg.cc/vTjRHTsr/1665828166-ss-34cd494551068f3c83179942b6964ece1333ccda-1920x1080.jpg",
-    "https://i.postimg.cc/rp9vRQk7/1665828171-ss-beff0e42c05657a30af3adfdc61499e836b8830e-1920x1080.jpg",
-    "https://i.postimg.cc/kMHLS208/1665828133-ss-971beba92204ad268878b23aa5288cc4f2118788-1920x1080.jpg",
-    "https://i.postimg.cc/8Cw0zcdL/1665828151-ss-4198c024c13b1477240cf043cd4f7867913f77e1-1920x1080.jpg",
-    "https://i.postimg.cc/1Rgsb1PF/1665828207-ss-1950c472438a5ccde0f9e7c112dceaddd7cd52f1-1920x1080.jpg"
-  ],
-  "video_urls": [
-    "https://youtu.be/CMRBuagwRb4"
-  ],
-  "executable_path": "",
-  "min_os": "Windows 10 64-bit",
-  "min_processor": "Intel Core i3-4160 / AMD Ryzen 3 1200",
-  "min_memory": "8 GB RAM",
-  "min_graphics": "NVIDIA GTX 950 / AMD Radeon RX 470",
-  "min_storage": "75 GB",
-  "rec_os": "Windows 10 64-bit",
-  "rec_processor": "Intel Core i5-4670 / AMD Ryzen 5 1600",
-  "rec_memory": "16 GB RAM",
-  "rec_graphics": "NVIDIA GTX 1060 6GB / AMD Radeon RX 580 8GB",
-  "rec_storage": "75 GB",
-  "min_launcher_version": "1.8.3"
-  }
 ]
