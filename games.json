@@ -315,7 +315,7 @@
     "rec_memory": "12 GB RAM",
     "rec_graphics": "NVIDIA GeForce GTX 1060 / AMD Radeon RX 580",
     "rec_storage": "72 GB",
-    "min_launcher_version": "1.8.0"
+    "min_launcher_version": "1.8.2"
   },
   {
     "title": "Call of Duty: Modern Warfare 3 (2023)",
@@ -353,7 +353,7 @@
     "rec_memory": "16 GB RAM",
     "rec_graphics": "NVIDIA GeForce GTX 1080 Ti - AMD Radeon RX 6700 XT",
     "rec_storage": "149 GB SSD",
-    "min_launcher_version": "1.8.0"
+    "min_launcher_version": "1.8.2"
   },
   {
     "title": "Hollow Knight Silksong",
@@ -387,7 +387,7 @@
     "rec_memory": "8 GB RAM",
     "rec_graphics": "NVIDIA GeForce GTX 560 - AMD Radeon HD 6870",
     "rec_storage": "10 GB",
-    "min_launcher_version": "1.8.0"
+    "min_launcher_version": "1.8.2"
   },
   {
     "title": "Little Nightmares 3 (III)",
@@ -423,6 +423,40 @@
     "rec_memory": "8 GB RAM",
     "rec_graphics": "NVIDIA GeForce GTX 560 - AMD Radeon HD 6870",
     "rec_storage": "10 GB",
-    "min_launcher_version": "1.8.0"
+    "min_launcher_version": "1.8.2"
+  },
   }
+    "title": "Call of Duty: Modern Warfare (2019)",
+    "description": "Переосмысление культовой серии Modern Warfare от Infinity Ward. Реалистичный шутер с захватывающим сюжетом и продвинутой графикой.",
+    "genre": "Экшены, Шутеры, Приключенческие, Мультиплеер",
+    "rating": 4.8,
+    "is_installed": false,
+    "in_library": false,
+    "download_url": "https://itorrents-igruha.net/engine/download.php?id=12345",
+    "file_size": "175 GB",
+    "avatar_url": "https://i.postimg.cc/XXXXXXX/call-of-duty-modern-warfare-2019-cover.jpg",
+    "screenshots": [
+        "https://i.postimg.cc/XXXXXXX/mw2019-screenshot1.jpg",
+        "https://i.postimg.cc/XXXXXXX/mw2019-screenshot2.jpg",
+        "https://i.postimg.cc/XXXXXXX/mw2019-screenshot3.jpg",
+        "https://i.postimg.cc/XXXXXXX/mw2019-screenshot4.jpg",
+        "https://i.postimg.cc/XXXXXXX/mw2019-screenshot5.jpg",
+        "https://i.postimg.cc/XXXXXXX/mw2019-screenshot6.jpg"
+    ],
+    "video_urls": [
+        "https://youtu.be/bH1lHCirCGI"
+    ],
+    "executable_path": "",
+    "min_os": "Windows 10 64-bit",
+    "min_processor": "Intel Core i3-4340 or AMD FX-6300",
+    "min_memory": "8 GB RAM",
+    "min_graphics": "NVIDIA GeForce GTX 670 / NVIDIA GeForce GTX 1650 or AMD Radeon HD 7950",
+    "min_storage": "175 GB available space",
+    "rec_os": "Windows 10 64-bit",
+    "rec_processor": "Intel Core i5-2500K or AMD Ryzen R5 1600X",
+    "rec_memory": "12 GB RAM",
+    "rec_graphics": "NVIDIA GeForce GTX 970 / NVIDIA GeForce GTX 1660 or AMD Radeon R9 390 / AMD RX 580",
+    "rec_storage": "175 GB available space",
+    "min_launcher_version": "1.8.2"
+  {
 ]
