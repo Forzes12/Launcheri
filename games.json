@@ -426,37 +426,71 @@
     "min_launcher_version": "1.8.2"
   },
   {
-    "title": "Call of Duty: Modern Warfare (2019)",
-    "description": "Переосмысление культовой серии Modern Warfare от Infinity Ward. Реалистичный шутер с захватывающим сюжетом и продвинутой графикой.",
-    "genre": "Экшены, Шутеры, Приключенческие, Мультиплеер",
+    "title": "Spider-Man: Miles Morales",
+    "description": "Приключения Майлза Моралеса в роли нового Человека-паука. Захватывающий сюжет, уникальные способности и эпические сражения в Нью-Йорке.",
+    "genre": "Экшены, Приключенческие, Ролевые",
     "rating": 4.8,
     "is_installed": false,
     "in_library": false,
-    "download_url": "https://itorrents-igruha.net/engine/download.php?id=12345",
-    "file_size": "175 GB",
-    "avatar_url": "https://i.postimg.cc/XXXXXXX/call-of-duty-modern-warfare-2019-cover.jpg",
+    "download_url": "https://itorrents-igruha.net/engine/download.php?id=90123",
+    "file_size": "75 GB",
+    "avatar_url": "https://i.postimg.cc/k5yCC7hC/1665881057-cover.jpg",
     "screenshots": [
-        "https://i.postimg.cc/XXXXXXX/mw2019-screenshot1.jpg",
-        "https://i.postimg.cc/XXXXXXX/mw2019-screenshot2.jpg",
-        "https://i.postimg.cc/XXXXXXX/mw2019-screenshot3.jpg",
-        "https://i.postimg.cc/XXXXXXX/mw2019-screenshot4.jpg",
-        "https://i.postimg.cc/XXXXXXX/mw2019-screenshot5.jpg",
-        "https://i.postimg.cc/XXXXXXX/mw2019-screenshot6.jpg"
+        "https://i.postimg.cc/XXXXXXX/spiderman-miles-1.jpg",
+        "https://i.postimg.cc/XXXXXXX/spiderman-miles-2.jpg",
+        "https://i.postimg.cc/XXXXXXX/spiderman-miles-3.jpg",
+        "https://i.postimg.cc/XXXXXXX/spiderman-miles-4.jpg",
+        "https://i.postimg.cc/XXXXXXX/spiderman-miles-5.jpg",
+        "https://i.postimg.cc/XXXXXXX/spiderman-miles-6.jpg"
     ],
     "video_urls": [
-        "https://youtu.be/bH1lHCirCGI"
+        "https://youtu.be/g0A996p1K_c"
     ],
     "executable_path": "",
     "min_os": "Windows 10 64-bit",
-    "min_processor": "Intel Core i3-4340 or AMD FX-6300",
+    "min_processor": "Intel Core i3-4160 or AMD equivalent",
     "min_memory": "8 GB RAM",
-    "min_graphics": "NVIDIA GeForce GTX 670 / NVIDIA GeForce GTX 1650 or AMD Radeon HD 7950",
-    "min_storage": "175 GB available space",
+    "min_graphics": "NVIDIA GTX 950 or AMD Radeon RX 470",
+    "min_storage": "75 GB available space",
     "rec_os": "Windows 10 64-bit",
-    "rec_processor": "Intel Core i5-2500K or AMD Ryzen R5 1600X",
-    "rec_memory": "12 GB RAM",
-    "rec_graphics": "NVIDIA GeForce GTX 970 / NVIDIA GeForce GTX 1660 or AMD Radeon R9 390 / AMD RX 580",
-    "rec_storage": "175 GB available space",
+    "rec_processor": "Intel Core i5-4670 or AMD Ryzen 5 1600",
+    "rec_memory": "16 GB RAM",
+    "rec_graphics": "NVIDIA GTX 1060 6GB or AMD Radeon RX 580 8GB",
+    "rec_storage": "75 GB available space",
+    "min_launcher_version": "1.8.2"
+  },
+  {
+    "title": "Spider-Man: Miles Morales",
+    "description": "Приключения Майлза Моралеса в роли нового Человека-паука. Захватывающий сюжет, уникальные способности и эпические сражения в Нью-Йорке.",
+    "genre": "Экшены, Приключенческие, Ролевые",
+    "rating": 4.8,
+    "is_installed": false,
+    "in_library": false,
+    "download_url": "https://itorrents-igruha.net/engine/download.php?id=90123",
+    "file_size": "75 GB",
+    "avatar_url": "https://i.postimg.cc/k5yCC7hC/1665881057-cover.jpg",
+    "screenshots": [
+        "https://i.postimg.cc/XXXXXXX/spiderman-miles-1.jpg",
+        "https://i.postimg.cc/XXXXXXX/spiderman-miles-2.jpg",
+        "https://i.postimg.cc/XXXXXXX/spiderman-miles-3.jpg",
+        "https://i.postimg.cc/XXXXXXX/spiderman-miles-4.jpg",
+        "https://i.postimg.cc/XXXXXXX/spiderman-miles-5.jpg",
+        "https://i.postimg.cc/XXXXXXX/spiderman-miles-6.jpg"
+    ],
+    "video_urls": [
+        "https://youtu.be/g0A996p1K_c"
+    ],
+    "executable_path": "",
+    "min_os": "Windows 10 64-bit",
+    "min_processor": "Intel Core i3-4160 or AMD equivalent",
+    "min_memory": "8 GB RAM",
+    "min_graphics": "NVIDIA GTX 950 or AMD Radeon RX 470",
+    "min_storage": "75 GB available space",
+    "rec_os": "Windows 10 64-bit",
+    "rec_processor": "Intel Core i5-4670 or AMD Ryzen 5 1600",
+    "rec_memory": "16 GB RAM",
+    "rec_graphics": "NVIDIA GTX 1060 6GB or AMD Radeon RX 580 8GB",
+    "rec_storage": "75 GB available space",
     "min_launcher_version": "1.8.2"
   }
 ]
