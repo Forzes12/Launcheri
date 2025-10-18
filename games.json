@@ -425,7 +425,7 @@
     "rec_storage": "10 GB",
     "min_launcher_version": "1.8.2"
   },
-  }
+  {
     "title": "Call of Duty: Modern Warfare (2019)",
     "description": "Переосмысление культовой серии Modern Warfare от Infinity Ward. Реалистичный шутер с захватывающим сюжетом и продвинутой графикой.",
     "genre": "Экшены, Шутеры, Приключенческие, Мультиплеер",
@@ -458,5 +458,5 @@
     "rec_graphics": "NVIDIA GeForce GTX 970 / NVIDIA GeForce GTX 1660 or AMD Radeon R9 390 / AMD RX 580",
     "rec_storage": "175 GB available space",
     "min_launcher_version": "1.8.2"
-  {
+  }
 ]
