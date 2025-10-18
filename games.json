@@ -33,7 +33,7 @@
     "rec_memory": "8 GB RAM",
     "rec_graphics": "NVIDIA GPU GeForce GTX 770",
     "rec_storage": "50 GB",
-    "min_launcher_version": "1.8.0"
+    "min_launcher_version": "1.8.1"
   },
   {
     "title": "Just Cause 4",
@@ -69,7 +69,7 @@
     "rec_memory": "8 GB RAM",
     "rec_graphics": "NVIDIA GeForce GTX 770 (2 ГБ)",
     "rec_storage": "50 GB",
-    "min_launcher_version": "1.8.0"
+    "min_launcher_version": "1.8.1"
   },
   {
     "title": "Dying Light 2 Stay Human",
@@ -105,7 +105,7 @@
     "rec_memory": "16 GB RAM",
     "rec_graphics": "NVIDIA GeForce RTX 2060 (6 Гб) - AMD Radeon RX Vega 56 (8 Гб)",
     "rec_storage": "41.47 GB",
-    "min_launcher_version": "1.8.0"
+    "min_launcher_version": "1.8.1"
   },
   {
     "title": "Dying Light: The Beast",
