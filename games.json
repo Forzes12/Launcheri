@@ -1138,7 +1138,7 @@
     "rec_memory": "512 MB RAM",
     "rec_graphics": "NVIDIA GeForce 6800 GT / ATI Radeon X800",
     "rec_storage": "3 GB HDD",
-    "min_launcher_version": "1.9.4",
+    "min_launcher_version": "1.8.4",
     "special_features": [
         "Система «Зала Славы» из 15 лучших гонщиков города",
         "Динамичные полицейские погони с продвинутой тактикой",
@@ -1194,6 +1194,144 @@
         "Все DLC миссии и оружие включены в комплект",
         "Режим выживания против волн врагов",
         "Расширенные тактические возможности и инвентарь"
+    ]
+  },
+  {
+        "title": "Project CARS 2",
+    "description": "Погрузитесь в мир профессионального автоспорта с самой продвинутой гоночной симуляцией! Более 180 лицензированных автомобилей и 140 трасс ждут вас. Динамичная погода, смена времени суток и бескомпромиссная физика управления предоставляют невероятно реалистичный опыт гонок. Станьте чемпионом в карьере профессионального гонщика или создайте свою гоночную серию мечты.",
+    "genre": "Гонки, Автосимулятор, Спорт, Реализм",
+    "rating": 4.7,
+    "is_installed": false,
+    "in_library": false,
+    "download_url": "https://itorrents-igruha.net/engine/download.php?id=9955",
+    "file_size": "45 GB",
+    "avatar_url": "https://i.postimg.cc/mZz0b46w/1497181399-cover.jpg",
+    "screenshots": [
+        "https://i.postimg.cc/RF3bV1dy/1506067303-ss-0abe5d051b0842d31edabd4634d2d4d34ffee3f5-1920x1080.jpg",
+        "https://i.postimg.cc/przGK2gC/1506067251-ss-867db083519e1aca1d997e23397f4f2a42351153-1920x1080.jpg",
+        "https://i.postimg.cc/3rvbsBdB/1506067300-ss-3501ee2e487788af76710dee32a8b1386a9d60f8-1920x1080.jpg",
+        "https://i.postimg.cc/ncfwpDmz/1506067321-ss-a8a26730c27ac43feb5866ee34345cce2899dbc7-1920x1080.jpg",
+        "https://i.postimg.cc/pdrsqQwF/1506067284-ss-ac3543ff492642486046b7e3731ea6ab697671e4-1920x1080.jpg",
+        "https://i.postimg.cc/tTV2HqCh/1506067269-ss-d66a5952effa3cbbc15969a8df7ac4354e67b2b0-1920x1080.jpg",
+        "https://i.postimg.cc/Fzyp7TSm/1506067294-ss-e5ac9ef3c4dcf6e969a1264a30e118c4cf45e1d1-1920x1080.jpg",
+        "https://i.postimg.cc/hPnMHqFc/1506067287-ss-e653df4ff7cb8c8c1d2242a04d45aef5181e67c5-1920x1080.jpg"
+    ],
+    "video_urls": [
+        "https://youtu.be/LU8W83oDFg4"
+    ],
+    "executable_path": "ProjectCARS2.exe",
+    "min_os": "Windows 10 64-bit",
+    "min_processor": "Intel Core i3-4130 или AMD FX-4350",
+    "min_memory": "8 GB RAM",
+    "min_graphics": "NVIDIA GTX 680 или AMD Radeon R9 270X",
+    "min_storage": "50 GB HDD",
+    "rec_os": "Windows 10 64-bit",
+    "rec_processor": "Intel Core i7-6700K или AMD Ryzen 5 2600X",
+    "rec_memory": "16 GB RAM",
+    "rec_graphics": "NVIDIA GTX 1080 или AMD Radeon RX 580",
+    "rec_storage": "50 GB SSD",
+    "min_launcher_version": "1.8.4",
+    "special_features": [
+        "Более 180 лицензированных автомобилей от классических до современных гиперкаров",
+        "140+ трасс со всего мира с полной лицензией",
+        "Динамическая система погоды LiveTrack 3.0",
+        "Полноценная карьера профессионального гонщика",
+        "Реалистичная физика управления и повреждений",
+        "Система смены времени суток и сезонов",
+        "Поддержка VR и многопользовательских гонок",
+        "Глубокие настройки настроек автомобиля"
+    ]
+  },
+  {
+    "title": "Call of Duty: Ghosts",
+    "description": "Война изменилась. После глобальной катастрофы новая мировая сверхдержава угрожает свободе всего человечества. Присоединяйтесь к элитному отряду 'Призраков' - последней надежде на выживание. Сражайтесь на суше, в воздухе и на море в эпической кампании, испытайте новые режимы многопользовательской игры и выживайте в кооперативе против невероятных угроз.",
+    "genre": "Шутер, Экшен, Мультиплеер, Военный",
+    "rating": 4.6,
+    "is_installed": false,
+    "in_library": false,
+    "download_url": "https://itorrents-igruha.net/engine/download.php?id=5498",
+    "file_size": "35 GB",
+    "avatar_url": "https://i.postimg.cc/L43jgY7g/1673630908-cover.jpg",
+    "screenshots": [
+        "https://i.postimg.cc/j5KLRvRc/1429040597-11-1-1024x-640.jpg",
+        "https://i.postimg.cc/T2tpXrFn/1429040572-12-1-1z024x576.jpg",
+        "https://i.postimg.cc/8z65Wx5F/1429040581-13-1-10h24x682.jpg",
+        "https://i.postimg.cc/q7cvDny9/1429040638-16-1-h1024x576.jpg",
+        "https://i.postimg.cc/gJNkmWSk/1429040626-18-1-1024x576.jpg",
+        "https://i.postimg.cc/HsfWp32G/1429040554-19-1-1024x576.jpg"
+    ],
+    "video_urls": [
+        "https://youtu.be/Zxnx3W-HA18",
+        "https://youtu.be/SumIZb6qMJw"
+    ],
+    "executable_path": "CoDGhosts.exe",
+    "min_os": "Windows 7 64-bit",
+    "min_processor": "Intel Core 2 Duo E8200 2.66 GHz или AMD Phenom X3 8750 2.4 GHz",
+    "min_memory": "6 GB RAM",
+    "min_graphics": "NVIDIA GeForce GTS 450 или ATI Radeon HD 5870",
+    "min_storage": "40 GB HDD",
+    "rec_os": "Windows 8 64-bit",
+    "rec_processor": "Intel Core i5 - 680 3.6 GHz",
+    "rec_memory": "8 GB RAM",
+    "rec_graphics": "NVIDIA GeForce GTX 760 или AMD Radeon R9 270X",
+    "rec_storage": "40 GB HDD",
+    "min_launcher_version": "1.8.4",
+    "special_features": [
+        "Новая сюжетная кампания с отрядом 'Призраков'",
+        "Расширенный мультиплеер с кастомизацией солдата",
+        "Режим выживания 'Squads' против волн врагов",
+        "Реалистичная динамика окружающей среды и разрушений",
+        "Система создания собственного оружия и перков",
+        "Эпические set-piece сражения на разных локациях",
+        "Улучшенная графика на движке нового поколения",
+        "Поддержка до 18 игроков в многопользовательских матчах"
+    ]
+  },
+  {
+        "title": "Quantum Break",
+    "description": "Время подвело. Неудачный эксперимент привёл к разлому времени, который грозит полным уничтожением всего сущего. Оказавшись в центре катастрофы, Джек Джойс получает невероятные способности, позволяющие управлять временем. В этой уникальной смеси блокбастерного экшена и телесериала ваши решения в игре напрямую влияют на сюжет шоу. Сразитесь за будущее, пока время не истекло.",
+    "genre": "Экшен, Шутер, Приключение, Научная фантастика",
+    "rating": 4.5,
+    "is_installed": false,
+    "in_library": false,
+    "download_url": "https://itorrents-igruha.net/engine/download.php?id=2630",
+    "file_size": "68 GB",
+    "avatar_url": "https://i.postimg.cc/sxCFk0yD/1673547026-cover.jpg",
+    "screenshots": [
+        "https://i.postimg.cc/Wz895916/1458677246-75184-oetpz2vfxa-3.jpg",
+        "https://i.postimg.cc/s2Wwkf22/1458677213-121860-wz8htfozjj-quantum-break-time-stop.jpg",
+        "https://i.postimg.cc/ZYHVtMJB/1458677218-121861-xcswg9xgj6-quantum-break-punch.jpg",
+        "https://i.postimg.cc/FHMxVtxR/1458677244-121863-mgwsbtuccj-quantum-break-monarch.jpg",
+        "https://i.postimg.cc/rmJCTDX7/1458677220-143440-lhat8zep7q-spjznjdfk4y.jpg",
+        "https://i.postimg.cc/pVsY15Bq/1458677193-qb4-big.jpg",
+        "https://i.postimg.cc/KYhngPZR/1458677202-qb6-big.jpg",
+        "https://i.postimg.cc/DZBsDR12/1458677218-quantum-break-1920xauto.jpg",
+        "https://i.postimg.cc/nVSB1bH3/1458677257-quantum-break-16.jpg",
+        "https://i.postimg.cc/jdGfGHnW/1458677177-uq8fx6zv.jpg"
+    ],
+    "video_urls": [
+        "https://youtu.be/F2pLqQsj8tQ"
+    ],
+    "executable_path": "QuantumBreak.exe",
+    "min_os": "Windows 10 (64-bit)",
+    "min_processor": "Intel Core i5-4460 или AMD FX-6300",
+    "min_memory": "8 GB RAM",
+    "min_graphics": "NVIDIA GeForce GTX 760 или AMD Radeon R7 260x",
+    "min_storage": "70 GB HDD",
+    "rec_os": "Windows 10 (64-bit)",
+    "rec_processor": "Intel Core i7-4790 или AMD FX-8350",
+    "rec_memory": "16 GB RAM",
+    "rec_graphics": "NVIDIA GeForce GTX 970 / 1060 или AMD Radeon R9 390 / RX 480",
+    "rec_storage": "70 GB SSD",
+    "min_launcher_version": "1.8.4",
+    "special_features": [
+        "Гибнущий мир: играйте в условиях постоянно коллапсирующего времени",
+        "Силы времени: останавливайте, замедляйте и искажайте время в бою и при исследовании",
+        "Гибридный проект: ваши выборы влияют на сюжет полноценного телесериала с живыми актёрами",
+        "Кинематографичный сюжет: история от Ремеди о судьбе, силе и искуплении",
+        "Эпичные сражения с боссами: сражайтесь с врагами, использующими те же силы времени",
+        "Динамичные боевые сцены: комбинируйте стрельбу и временные способности",
+        "Мощный графический движок: потрясающие визуальные эффекты и детализация"
     ]
   }
 ]
