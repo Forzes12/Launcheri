@@ -1138,7 +1138,7 @@
     "rec_memory": "512 MB RAM",
     "rec_graphics": "NVIDIA GeForce 6800 GT / ATI Radeon X800",
     "rec_storage": "3 GB HDD",
-    "min_launcher_version": "1.8.3",
+    "min_launcher_version": "1.8.4",
     "special_features": [
         "Система «Зала Славы» из 15 лучших гонщиков города",
         "Динамичные полицейские погони с продвинутой тактикой",
@@ -1148,6 +1148,52 @@
         "Разнообразие гоночных дисциплин: Кольцо, Спринт, Выбывание",
         "Система репутации и уникальных наград за стиль вождения",
         "Сеть секретных гаражей и укрытий для ухода от погонь"
+    ]
+  },
+  {
+        "title": "Sniper Elite V2 Remastered",
+    "description": "Окунитесь в хаос Второй мировой войны в роли элитного снайпера. Ваша задача — остановить нацистскую ядерную программу любой ценой. Исследуйте разрушенные города, используйте тактическую хитрость и мастерство снайпера, чтобы устранить ключевые цели. Улучшенная графика и новые возможности в этой культовой ремастированной версии.",
+    "genre": "Шутер, Стелс, Тактический, Снайпинг",
+    "rating": 4.8,
+    "is_installed": false,
+    "in_library": false,
+    "download_url": "https://itorrents-igruha.net/engine/download.php?id=12928",
+    "file_size": "18.7 GB",
+    "avatar_url": "https://i.postimg.cc/bdfvFJD8/1557807904-cover.jpg",
+    "screenshots": [
+        "https://i.postimg.cc/Y25zQB2N/1556539921-ss-6ea3313a42bab22981052381a6a8e2ba252f4716-1920x1080.jpg",
+        "https://i.postimg.cc/gJw36NC9/1556539909-ss-7ac5397e9e582cce58a10d5451b12099788d66c8-1920x1080.jpg",
+        "https://i.postimg.cc/wTYD75FZ/1556539839-ss-8cb82d44f5386c3132189a4a19cd420f3b9e16e2-1920x1080.jpg",
+        "https://i.postimg.cc/pLqjGwvD/1556539867-ss-784eab940ab44b788758b86e192b0215f3a7889b-1920x1080.jpg",
+        "https://i.postimg.cc/W4ykj0hy/1556539910-ss-73601abe8d3bdc5827e8b271dccef05ae0396752-1920x1080.jpg",
+        "https://i.postimg.cc/5yBYwGpz/1556539856-ss-80114d6ef52642aa24d66a5165d150182b883a73-1920x1080.jpg",
+        "https://i.postimg.cc/sDzZVjDY/1556539839-ss-e3d4a345efe611da3bab100232f87bb50a04e71b-1920x1080.jpg",
+        "https://i.postimg.cc/nhcjD3mR/1556539843-ss-f6c909db3d6c410a248df7795f86944aaca00a46-1920x1080.jpg"
+    ],
+    "video_urls": [
+        "https://youtu.be/nKB1ioeA988"
+    ],
+    "executable_path": "SniperEliteV2Remastered.exe",
+    "min_os": "Windows 7/8/10 64-bit",
+    "min_processor": "Intel CPU Core i3-2100 или AMD эквивалент",
+    "min_memory": "4 GB RAM",
+    "min_graphics": "AMD Radeon HD 7870 (2GB) или NVIDIA GeForce GTX 660 (2GB)",
+    "min_storage": "25 GB HDD",
+    "rec_os": "Windows 10 64-bit",
+    "rec_processor": "Intel CPU Core i7-3770 или AMD эквивалент",
+    "rec_memory": "8 GB RAM",
+    "rec_graphics": "NVIDIA GeForce GTX 970 (4GB) или AMD Radeon R9 390 (4GB)",
+    "rec_storage": "25 GB SSD",
+    "min_launcher_version": "1.8.4",
+    "special_features": [
+        "Знаменитая система рентгеновских убийств в реальном времени",
+        "Тактический снайпинг с учетом баллистики и окружающей среды",
+        "Улучшенная графика 4K и переработанные визуальные эффекты",
+        "Реалистичная система маскировки и обнаружения",
+        "Фоторежим для создания идеальных снимков",
+        "Все DLC миссии и оружие включены в комплект",
+        "Режим выживания против волн врагов",
+        "Расширенные тактические возможности и инвентарь"
     ]
   }
 ]
