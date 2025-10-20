@@ -1138,7 +1138,7 @@
     "rec_memory": "512 MB RAM",
     "rec_graphics": "NVIDIA GeForce 6800 GT / ATI Radeon X800",
     "rec_storage": "3 GB HDD",
-    "min_launcher_version": "1.8.4",
+    "min_launcher_version": "1.8.2",
     "special_features": [
         "Система «Зала Славы» из 15 лучших гонщиков города",
         "Динамичные полицейские погони с продвинутой тактикой",
