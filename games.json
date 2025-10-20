@@ -1102,5 +1102,51 @@
       "Система достижений и наград за победы",
       "Возможность скрываться от полиции в укрытиях"
     ]
-  }
+  },
+  {
+    "title": "RoadCraft",
+    "description": "Станьте легендой андеграундных гонок в огромном мегаполисе! Докажите свое мастерство, бросив вызов элите уличных гонщиков в «Зале Славы». Участвуйте в безумных заездах, избегайте масштабных полицейских облав и тюнингуйте свой автомобиль, чтобы создать идеальную машину для победы. Это новая глава в жанре гонок с открытым миром.",
+    "genre": "Гонки, Авто, Аркада, Открытый мир",
+    "rating": 4.9,
+    "is_installed": false,
+    "in_library": false,
+    "download_url": "https://itorrents-igruha.net/engine/download.php?id=90002",
+    "file_size": "2.5 GB",
+    "avatar_url": "https://i.postimg.cc/mZvW9KWS/1740992957-library-600x900-2x.jpg",
+    "screenshots": [
+        "https://i.postimg.cc/zfbkT2rJ/1740992930-ss-3dedfb6defa4bc578405b383e8d66ab9d27e657c.jpg",
+        "https://i.postimg.cc/pXsQ4MVQ/1740992987-ss-62f78e7fbb3d1bf41243f54eab586ccbd18f1e90.jpg",
+        "https://i.postimg.cc/br3n71PX/1740992980-ss-963ec7cdc6c0f83d19506ac205eb3dfb76ec7b79.jpg",
+        "https://i.postimg.cc/zBkHhTVw/1740992951-ss-3079fea3e7d337ced3a05d55b87bbb335e117e66.jpg",
+        "https://i.postimg.cc/fR03KGV4/1740992958-ss-6641e04329acb4ce19c68504bdb911f8382d5d33.jpg",
+        "https://i.postimg.cc/yxbdhjBh/1740992949-ss-e165ec22c60612162e66de2c71206134cb2334e2.jpg",
+        "https://i.postimg.cc/7LnZtwwP/1740992971-ss-f78cf0214fccffe4aad353f2ff460374d3072bf4.jpg",
+        "https://i.postimg.cc/nh8VHCh0/1740993023-ss-ffbb319ee4b154d7529c77a2d944c92958e7744e.jpg"
+        
+    ],
+    "video_urls": [
+        "https://youtu.be/0YxFJTFi0Os"
+    ],
+    "executable_path": "roadcraft.exe",
+    "min_os": "Windows 2000/XP",
+    "min_processor": "Intel Pentium 4 1.4 GHz или аналогичный",
+    "min_memory": "256 MB RAM",
+    "min_graphics": "NVIDIA GeForce 4 Ti 4200 / ATI Radeon 8500",
+    "min_storage": "3 GB HDD",
+    "rec_os": "Windows XP",
+    "rec_processor": "Intel Pentium 4 2.8 GHz или аналогичный",
+    "rec_memory": "512 MB RAM",
+    "rec_graphics": "NVIDIA GeForce 6800 GT / ATI Radeon X800",
+    "rec_storage": "3 GB HDD",
+    "min_launcher_version": "1.8.3",
+    "special_features": [
+        "Система «Зала Славы» из 15 лучших гонщиков города",
+        "Динамичные полицейские погони с продвинутой тактикой",
+        "Система розыска до 5 уровня с развертыванием спецотрядов",
+        "Эксклюзивный гоночный автомобиль «Aurora R-Spec» для сюжетных заездов",
+        "Упрощенная система тюнинга «Instant Tune» для быстрой настройки",
+        "Разнообразие гоночных дисциплин: Кольцо, Спринт, Выбывание",
+        "Система репутации и уникальных наград за стиль вождения",
+        "Сеть секретных гаражей и укрытий для ухода от погонь"
+    ]
 ]
